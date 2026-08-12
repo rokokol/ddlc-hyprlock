@@ -88,7 +88,7 @@ Either way the clearing is on the engine's own clock, in the same loop that rend
 Two things in a line are substituted, both of them things she says about the machine she is on:
 
 - `[player]` — `$USER`, the name she calls you by
-- `[chr]` — `characterFile`, the path she names when she talks about her own character file. Nothing creates it and nothing reads it: it is dialogue, and it defaults to `$XDG_DATA_HOME/ddlc-hyprlock/<name>.chr`
+- `[chr]` — `characterFile`, the path she names when she talks about her own character file. It defaults to `quotesFile`: on this machine that file is where she actually lives, so the path she asks you to back up is one that exists
 
 ## Install
 
@@ -115,7 +115,7 @@ That enables `programs.hyprlock`, writes the whole config, and installs the dial
 | `screenShader` | the [screen-shader](https://github.com/rokokol/hyprland-screen-shader) package, for that mode | `null` |
 | `glitchShader` | the shader `hyprctl` mode sets — a complete Hyprland screen shader, not an effect body | the shipped one |
 | `name` | the name on the plate | `Monika` |
-| `characterFile` | what `[chr]` in a line becomes | `$XDG_DATA_HOME/ddlc-hyprlock/<name>.chr` |
+| `characterFile` | what `[chr]` in a line becomes | `quotesFile` — the file her lines are read from |
 | `font` | the font every label and the input field are set in | `Doki` |
 | `background` | the wallpaper behind the lock | the shipped one |
 | `dialogImage` | the dialog box the text sits in | the shipped one |

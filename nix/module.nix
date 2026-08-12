@@ -122,8 +122,8 @@ in
       example = "$HOME/ddlc/game/characters/monika.chr";
       description = ''
         What `[chr]` in a line becomes — the path she names when she talks about her own
-        character file. Nothing creates it and nothing reads it: this is dialogue, not a file.
-        Defaults to `$XDG_DATA_HOME/ddlc-hyprlock/<name>.chr`
+        character file. Defaults to `quotesFile`, which on this machine is where she does in
+        fact live, so the path she names is one you could actually back up
       '';
     };
 

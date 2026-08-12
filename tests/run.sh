@@ -158,9 +158,9 @@ say 'Back it up: [chr]'
 lock
 chr=$(settled) || fail "the [chr] frame never settled"
 stop
-# Dialogue, not a file: nothing creates the path, so the check is only that it is spelled out
-if [[ "$chr" == *"$HOME/.local/share/ddlc-hyprlock/monika.chr"* ]]; then
-  ok "[chr] became the path she names"
+# The default is the quotes file, so the path she names is one that is really there
+if [[ "$chr" == *"$WORK/talk.txt"* && -r "$WORK/talk.txt" ]]; then
+  ok "[chr] became the file her lines are read from"
 else
   fail "[chr] was not substituted: $chr"
 fi

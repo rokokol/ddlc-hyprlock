@@ -46,8 +46,8 @@ What is said and by whom:
   DDLC_HYPRLOCK_REENTRY  the topics a lock opens with
   DDLC_HYPRLOCK_NAME     the name on the plate (default Monika)
   DDLC_HYPRLOCK_CHR      what [chr] in a line becomes: the path she names when
-                         she talks about her own character file. Nothing creates
-                         it — it is dialogue, not a file this reads
+                         she talks about her own character file. Defaults to the
+                         quotes file — the one her lines are read from
 
 Behaviour switches:
   DDLC_HYPRLOCK_GLITCH    1 (default) or 0. 0 drops the journal follower and the
@@ -77,9 +77,9 @@ SHARE="$HERE/../share/ddlc-hyprlock"
 QUOTES="${DDLC_HYPRLOCK_QUOTES:-$SHARE/monika-talk.txt}"
 REENTRY="${DDLC_HYPRLOCK_REENTRY:-$SHARE/monika-reentry.txt}"
 DIALOG_NAME="${DDLC_HYPRLOCK_NAME:-Monika}"
-# What [chr] becomes: the path she names when she talks about her own character file.
-# Nothing here creates it — it is a line of dialogue, not a file the engine reads
-CHR_FILE="${DDLC_HYPRLOCK_CHR:-${XDG_DATA_HOME:-$HOME/.local/share}/ddlc-hyprlock/${DIALOG_NAME,,}.chr}"
+# What [chr] becomes: the path she names when she talks about her own character file. The
+# quotes file by default, because on this machine that is where she actually lives
+CHR_FILE="${DDLC_HYPRLOCK_CHR:-$QUOTES}"
 
 TEXT_W="${DDLC_HYPRLOCK_TEXT_W:-1114}"
 FONT_PX="${DDLC_HYPRLOCK_FONT_PX:-32}"

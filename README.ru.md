@@ -88,7 +88,7 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 В строке подставляются две вещи, и обе — то, что она говорит про машину, на которой живёт:
 
 - `[player]` — `$USER`, имя, которым она тебя зовёт
-- `[chr]` — `characterFile`, путь, который она называет, когда говорит про свой файл персонажа. Его никто не создаёт и никто не читает: это реплика, а не файл, и по умолчанию это `$XDG_DATA_HOME/ddlc-hyprlock/<name>.chr`
+- `[chr]` — `characterFile`, путь, который она называет, когда говорит про свой файл персонажа. По умолчанию это `quotesFile`: на этой машине она и правда живёт в нём, так что путь, который она просит забэкапить, существует
 
 ## Установка
 
@@ -115,7 +115,7 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 | `screenShader` | пакет [screen-shader](https://github.com/rokokol/hyprland-screen-shader) — для этого режима | `null` |
 | `glitchShader` | шейдер, который ставит режим `hyprctl`: полный шейдер экрана Hyprland, а не тело эффекта | из комплекта |
 | `name` | имя на плашке | `Monika` |
-| `characterFile` | во что превращается `[chr]` в реплике | `$XDG_DATA_HOME/ddlc-hyprlock/<name>.chr` |
+| `characterFile` | во что превращается `[chr]` в реплике | `quotesFile` — файл, из которого читаются её реплики |
 | `font` | шрифт всех лейблов и поля ввода | `Doki` |
 | `background` | фон под локом | из комплекта |
 | `dialogImage` | сам диалоговый бокс | из комплекта |
