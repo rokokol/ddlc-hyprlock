@@ -58,9 +58,10 @@ Behaviour switches:
 How the screen flashes on a glitch — the text garbles either way:
   DDLC_HYPRLOCK_FLASH     hyprctl (default), screen-shader, or anything else for
                           no flash at all
-  DDLC_HYPRLOCK_GLITCH_SHADER  the shader the hyprctl mode sets, and clears again
-                          afterwards: that mode owns decoration:screen_shader, so
-                          whatever else was in it is gone
+  DDLC_HYPRLOCK_GLITCH_SHADER  the shader the hyprctl mode sets in
+                          decoration:screen_shader. That mode empties the option
+                          afterwards instead of restoring it, so a shader of your
+                          own does not survive a glitch
   DDLC_HYPRLOCK_SHADER    the screen-shader command, which composites the flash
                           over the effect already on screen and puts it back.
                           Missing or non-executable degrades to text-only
@@ -90,9 +91,9 @@ STATE_DIR="${DDLC_HYPRLOCK_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc}"
 GLITCH="${DDLC_HYPRLOCK_GLITCH:-1}"
 HYPRLOCK="${DDLC_HYPRLOCK_HYPRLOCK:-hyprlock}"
 
-# How the whole screen flashes on a glitch, and who owns decoration:screen_shader while it
-# does: hyprctl takes the option over and clears it afterwards, so whatever was in it is
-# gone; screen-shader composites the flash over the effect already there and puts it back.
+# How the whole screen flashes on a glitch. hyprctl sets decoration:screen_shader and empties
+# it again — it does not restore the previous value, so a shader of the user's own does not
+# survive; screen-shader composites the flash over the effect already there and puts it back.
 # Anything else, or a missing tool, leaves the glitch text-only
 FLASH="${DDLC_HYPRLOCK_FLASH:-hyprctl}"
 GLITCH_SHADER="${DDLC_HYPRLOCK_GLITCH_SHADER:-$SHARE/glitch.frag}"

@@ -75,7 +75,7 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 
 | `flash` | | |
 | --- | --- | --- |
-| `hyprctl` | ставит в `decoration:screen_shader` шейдер [`shaders/glitch.frag`](shaders/glitch.frag) из комплекта и убирает его, когда флеш кончился | не нужно ничего, кроме Hyprland, но эта опция целиком **его**: что бы там ни лежало, после первого глитча этого там нет |
+| `hyprctl` | ставит в `decoration:screen_shader` шейдер [`shaders/glitch.frag`](shaders/glitch.frag) из комплекта, а когда флеш кончился — очищает эту опцию | не нужно ничего, кроме Hyprland. Но очищает он её, а не возвращает прежнее значение: если в ней стоял твой собственный шейдер экрана, после первого глитча его там не будет |
 | `screen-shader` | отдаёт флеш [screen-shader](https://github.com/rokokol/hyprland-screen-shader), который композитит его поверх уже активного эффекта и возвращает всё как было | достаточно задать пакет в `screenShader` — он сам выбирает этот режим |
 | `none` | ничего, глитч остаётся только текстовым | |
 
@@ -88,7 +88,7 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 В строке подставляются две вещи, и обе — то, что она говорит про машину, на которой живёт:
 
 - `[player]` — `$USER`, имя, которым она тебя зовёт
-- `[chr]` — `characterFile`, путь, который она называет, когда говорит про свой файл персонажа. По умолчанию это `quotesFile`: на этой машине она и правда живёт в нём, так что путь, который она просит забэкапить, существует
+- `[chr]` — `characterFile`, путь, который она называет, когда говорит про свой файл персонажа. Следует за `quotesFile`: на этой машине она и правда живёт в нём, так что путь, который она просит забэкапить, существует
 
 ## Установка
 
@@ -115,7 +115,7 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 | `screenShader` | пакет [screen-shader](https://github.com/rokokol/hyprland-screen-shader) — для этого режима | `null` |
 | `glitchShader` | шейдер, который ставит режим `hyprctl`: полный шейдер экрана Hyprland, а не тело эффекта | из комплекта |
 | `name` | имя на плашке | `Monika` |
-| `characterFile` | во что превращается `[chr]` в реплике | `quotesFile` — файл, из которого читаются её реплики |
+| `characterFile` | во что превращается `[chr]` в реплике | следует за `quotesFile` |
 | `font` | шрифт всех лейблов и поля ввода | `Doki` |
 | `background` | фон под локом | из комплекта |
 | `dialogImage` | сам диалоговый бокс | из комплекта |

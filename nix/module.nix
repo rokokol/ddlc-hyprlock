@@ -80,9 +80,10 @@ in
       description = ''
         How the whole screen flashes on a glitch — the text garbles either way:
 
-        - `hyprctl` sets `glitchShader` and clears the option again when the flash is over.
-          It needs nothing but Hyprland, and it **owns** `decoration:screen_shader` while it
-          runs: anything else you had in there is gone after the first glitch
+        - `hyprctl` sets `glitchShader` in `decoration:screen_shader` and empties that option
+          again when the flash is over. It needs nothing but Hyprland, but it empties the
+          option rather than restoring what was in it: a screen shader of your own does not
+          survive the first glitch
         - `screen-shader` hands the flash to
           [screen-shader](https://github.com/rokokol/hyprland-screen-shader), which composites
           it over the effect already on screen and puts that back afterwards. Set
@@ -118,12 +119,13 @@ in
 
     characterFile = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
-      default = null;
+      default = cfg.quotesFile;
+      defaultText = lib.literalExpression "config.ddlc.hyprlock.quotesFile";
       example = "$HOME/ddlc/game/characters/monika.chr";
       description = ''
         What `[chr]` in a line becomes — the path she names when she talks about her own
-        character file. Defaults to `quotesFile`, which on this machine is where she does in
-        fact live, so the path she names is one you could actually back up
+        character file. Follows `quotesFile`, which on this machine is where she does in fact
+        live, so the path she names is one you could actually back up
       '';
     };
 
