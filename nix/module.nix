@@ -107,7 +107,7 @@ in
       default = null;
       description = ''
         The shader `flash = "hyprctl"` sets, a complete Hyprland screen shader rather than an
-        effect body. Defaults to the shipped one
+        effect body. Defaults to the shipped `shaders/glitch.frag`
       '';
     };
 
@@ -142,15 +142,15 @@ in
     background = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
-      description = "The wallpaper behind the lock. Defaults to the shipped one";
+      description = "The wallpaper behind the lock. Defaults to the shipped `assets/just-monika.png`";
     };
 
     dialogImage = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
       description = ''
-        The dialog box the text sits in. The geometry is measured off the shipped 1280x720
-        asset, so a replacement has to keep its canvas
+        The dialog box the text sits in. Defaults to the shipped `assets/dialog-box.png`, and
+        the geometry is measured off that 1280x720 canvas — a replacement has to keep it
       '';
     };
 
@@ -160,14 +160,15 @@ in
       description = ''
         What she talks about: blocks separated by a blank line, `#` lines are comments,
         `[player]` becomes the user's name and `[chr]` becomes `characterFile`. Defaults to
-        the shipped Act 3 dialogue, which uses `[player]` and no `[chr]`
+        the shipped `assets/monika-talk.txt`, her Act 3 dialogue, which uses `[player]` and no
+        `[chr]`
       '';
     };
 
     reentryFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
-      description = "The topics a lock opens with. Same format as `quotesFile`";
+      description = "The topics a lock opens with, `assets/monika-reentry.txt` by default. Same format as `quotesFile`";
     };
 
     placeholderText = lib.mkOption {

@@ -113,14 +113,14 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 | `glitch` | ломать диалог на неверный пароль и в случайные моменты | как `dialog` |
 | `flash` | чем глитчить весь экран: `hyprctl`, `screen-shader` или `none` | `screen-shader`, если задан `screenShader`, иначе `hyprctl` |
 | `screenShader` | пакет [screen-shader](https://github.com/rokokol/hyprland-screen-shader) — для этого режима | `null` |
-| `glitchShader` | шейдер, который ставит режим `hyprctl`: полный шейдер экрана Hyprland, а не тело эффекта | из комплекта |
+| `glitchShader` | шейдер, который ставит режим `hyprctl`: полный шейдер экрана Hyprland, а не тело эффекта | [`shaders/glitch.frag`](shaders/glitch.frag) |
 | `name` | имя на плашке | `Monika` |
 | `characterFile` | во что превращается `[chr]` в реплике | следует за `quotesFile` |
 | `font` | шрифт всех лейблов и поля ввода | `Doki` |
-| `background` | фон под локом | из комплекта |
-| `dialogImage` | сам диалоговый бокс | из комплекта |
-| `quotesFile` | о чём она говорит | реплики третьего акта из комплекта |
-| `reentryFile` | реплики, с которых открывается лок | из комплекта |
+| `background` | фон под локом | `assets/just-monika.png` |
+| `dialogImage` | сам диалоговый бокс | `assets/dialog-box.png` |
+| `quotesFile` | о чём она говорит | `assets/monika-talk.txt`, её реплики из третьего акта |
+| `reentryFile` | реплики, с которых открывается лок | `assets/monika-reentry.txt` |
 | `placeholderText` | что написано в пустом поле пароля | `<i>Give me it...~</i>` |
 | `failText` | что говорит неверный пароль | `This isn't it... ($ATTEMPTS)` |
 | `stateDir` | каталог, через который передаётся отрендеренный кадр: движок пишет туда `frame` и `name`, лейблы их `cat`'ают | `${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc` |

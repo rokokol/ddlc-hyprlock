@@ -113,14 +113,14 @@ That enables `programs.hyprlock`, writes the whole config, and installs the dial
 | `glitch` | garble the dialog on a wrong password and at random intervals | follows `dialog` |
 | `flash` | how the whole screen flashes on a glitch: `hyprctl`, `screen-shader` or `none` | `screen-shader` when `screenShader` is set, else `hyprctl` |
 | `screenShader` | the [screen-shader](https://github.com/rokokol/hyprland-screen-shader) package, for that mode | `null` |
-| `glitchShader` | the shader `hyprctl` mode sets — a complete Hyprland screen shader, not an effect body | the shipped one |
+| `glitchShader` | the shader `hyprctl` mode sets — a complete Hyprland screen shader, not an effect body | [`shaders/glitch.frag`](shaders/glitch.frag) |
 | `name` | the name on the plate | `Monika` |
 | `characterFile` | what `[chr]` in a line becomes | follows `quotesFile` |
 | `font` | the font every label and the input field are set in | `Doki` |
-| `background` | the wallpaper behind the lock | the shipped one |
-| `dialogImage` | the dialog box the text sits in | the shipped one |
-| `quotesFile` | what she talks about | the shipped Act 3 dialogue |
-| `reentryFile` | the topics a lock opens with | the shipped ones |
+| `background` | the wallpaper behind the lock | `assets/just-monika.png` |
+| `dialogImage` | the dialog box the text sits in | `assets/dialog-box.png` |
+| `quotesFile` | what she talks about | `assets/monika-talk.txt`, her Act 3 dialogue |
+| `reentryFile` | the topics a lock opens with | `assets/monika-reentry.txt` |
 | `placeholderText` | what the empty password field says | `<i>Give me it...~</i>` |
 | `failText` | what a wrong password says | `This isn't it... ($ATTEMPTS)` |
 | `stateDir` | the directory the rendered frame is handed over in: the engine writes `frame` and `name` there, the labels `cat` them | `${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc` |
