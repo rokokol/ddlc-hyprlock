@@ -4,12 +4,12 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-hyprlock-quote.sh — Monika's dialog for the DDLC lock screen
+ddlc-hyprlock — the DDLC dialog for a hyprlock lock screen
 
 Modes:
   lock   run a lock: start hyprlock and animate its dialog until it exits.
-         This is hypridle's lock_cmd, and every lock path (SUPER+F12,
-         rofi-power.sh, the idle timeout) funnels through it
+         This is what an idle daemon's lock command should be, so that every
+         lock path funnels through it
   help   this help
 
 The dialog labels just `cat` the files this loop writes, on hyprlock's own poll.
@@ -17,7 +17,7 @@ Never signal hyprlock: its SIGUSR2 handler walks the timer vector without the
 mutex and allocates inside the handler, so a push into a busy locker wedges it
 
 The loop runs in the foreground with hyprlock as its child: no daemon to reap,
-and lock_cmd blocks for exactly the duration of the lock. It never kills
+and the lock command blocks for exactly the duration of the lock. It never kills
 hyprlock — dying must not unlock the screen
 
 Typing is a Ren'Py trick: every frame renders the whole line, and the tail not
@@ -32,40 +32,51 @@ garbled with a "broken encoding"; the text glitches longer than the shader. A
 wrong password arrives as a line from a `journalctl -f` follower, which is also
 what the loop sleeps on — so it reacts at once without polling the journal
 
-Geometry is set by hyprlock.nix through the environment:
-  TEXT_W     width of the box text area, px (default 1114)
-  FONT_PX    line font size, px (font_size * 4/3; default 32) — the wrap and
-             space-line-width metrics are derived from it
-  POLL_MS    how often hyprlock re-reads the files (default 100); the loop
-             renders at exactly this rate and never faster
-  STATE_DIR  where the rendered frame/name files live; hyprlock.nix points the
-             labels at the same path
+Geometry has to be the same numbers the hyprlock config laid the text area out
+at, so it comes from the environment rather than from a guess here:
+  DDLC_HYPRLOCK_TEXT_W     width of the box text area, px (default 1114)
+  DDLC_HYPRLOCK_FONT_PX    line font size, px (font_size * 4/3; default 32) —
+                           the wrap and space-line-width metrics come from it
+  DDLC_HYPRLOCK_POLL_MS    how often hyprlock re-reads the files (default 100);
+                           the loop renders at exactly this rate, never faster
+  DDLC_HYPRLOCK_STATE_DIR  where the rendered frame/name files live; the labels
+                           in the config cat the same path
+
+What is said and by whom:
+  DDLC_HYPRLOCK_QUOTES   the topics file, blocks separated by a blank line
+  DDLC_HYPRLOCK_REENTRY  the topics a lock opens with
+  DDLC_HYPRLOCK_NAME     the name on the plate (default Monika)
 
 Behaviour switches:
-  GLITCH         1 (default) or 0. 0 drops the journal follower and the random
-                 glitch stream — the dialog still types, it just never garbles
-  SCREEN_SHADER  the screen-shader command for the full-screen flash. Missing or
-                 non-executable degrades the glitch to text-only
+  DDLC_HYPRLOCK_GLITCH    1 (default) or 0. 0 drops the journal follower and the
+                          random glitch stream — the dialog still types, it just
+                          never garbles
+  DDLC_HYPRLOCK_SHADER    the screen-shader command for the full-screen flash.
+                          Missing or non-executable degrades it to text-only
+  DDLC_HYPRLOCK_HYPRLOCK  the locker to run (default hyprlock on PATH)
 
 State is plain shell variables for the lifetime of the lock, so a fresh run is
 by definition a fresh lock and starts the dialog from the re-entry line
 EOF
 }
 
-HUIX="${HUIX:-$(cd -- "$(dirname -- "$0")/.." && pwd)}"
-export HUIX
+# Where the assets sit relative to bin/, so an install without Nix needs no settings
+HERE="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd)"
+SHARE="$HERE/../share/ddlc-hyprlock"
 
-QUOTES="$HUIX/assets/monika-talk.txt"
-REENTRY="$HUIX/assets/monika-reentry.txt"
+QUOTES="${DDLC_HYPRLOCK_QUOTES:-$SHARE/monika-talk.txt}"
+REENTRY="${DDLC_HYPRLOCK_REENTRY:-$SHARE/monika-reentry.txt}"
+DIALOG_NAME="${DDLC_HYPRLOCK_NAME:-Monika}"
 
-TEXT_W="${TEXT_W:-1114}"
-FONT_PX="${FONT_PX:-32}"
-STATE_DIR="${STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc}"
+TEXT_W="${DDLC_HYPRLOCK_TEXT_W:-1114}"
+FONT_PX="${DDLC_HYPRLOCK_FONT_PX:-32}"
+STATE_DIR="${DDLC_HYPRLOCK_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc}"
 
 # 0 drops the journal follower and the spontaneous-glitch stream: the dialog still types,
 # it just never garbles. The full-screen flash additionally needs screen-shader
-GLITCH="${GLITCH:-1}"
-SCREEN_SHADER="${SCREEN_SHADER:-screen-shader}"
+GLITCH="${DDLC_HYPRLOCK_GLITCH:-1}"
+SCREEN_SHADER="${DDLC_HYPRLOCK_SHADER:-screen-shader}"
+HYPRLOCK="${DDLC_HYPRLOCK_HYPRLOCK:-hyprlock}"
 
 # Doki metrics relative to the font size: at 32px a glyph averages 15px, space 8px
 AVG_ADV=$((FONT_PX * 15 / 32))
@@ -91,8 +102,8 @@ GLITCH_TEXT_MS=3600   # the text glitches longer than the shader
 
 FADE_MS=600 # smooth fade-out of a line
 
-# Frame rate, shared with the label poll in hyprlock.nix; 100 ms = one char at CPS=10
-POLL_MS="${POLL_MS:-100}"
+# Frame rate, shared with the label poll in the config; 100 ms = one char at CPS=10
+POLL_MS="${DDLC_HYPRLOCK_POLL_MS:-100}"
 IDLE_CAP_MS=1000 # sleep ceiling: bounds how late an unlock is noticed
 
 FRAME_FILE="$STATE_DIR/frame"
@@ -121,8 +132,8 @@ frame_prev=$'\0'
 name_prev=$'\0'
 now=0
 
-# Milliseconds without spawning date: EPOCHREALTIME = "sec.usec" (bash >= 5;
-# the separator depends on the locale — strip both the dot and the comma)
+# Milliseconds without spawning date: EPOCHREALTIME = "sec.usec" (bash >= 5.2, which is also
+# what the pango escaping needs; the separator depends on the locale — strip dot and comma)
 set_now() {
   local t=${EPOCHREALTIME//[.,]/}
   now=${t:0:-3}
@@ -140,11 +151,13 @@ exp_ms() {
     }')
 }
 
+# Pango entities. The backslashes are load-bearing: since bash 5.2 a bare & in a replacement
+# stands for the text that matched, so &lt; would come out as <lt;
 esc() {
   local s=$1
-  s=${s//&/&amp;}
-  s=${s//</&lt;}
-  s=${s//>/&gt;}
+  s=${s//&/\&amp;}
+  s=${s//</\&lt;}
+  s=${s//>/\&gt;}
   esc_v=$s
 }
 
@@ -227,32 +240,32 @@ fire_glitch() {
 # The typing -> shown edge is in build_frame, where the revealed length is known
 advance() {
   case "$phase" in
-  reentry)
-    start_topic "$REENTRY" last_reentry
-    ;;
-  shown)
-    if ((now >= until_ms)); then
-      phase=fadeout
-      reveal_ms=$now # start of the fade
-      until_ms=$((now + FADE_MS))
-    fi
-    ;;
-  fadeout)
-    if ((now >= until_ms)); then
-      if next_line; then
-        start_typing
-      else
-        phase=gap
-        exp_ms "$TOPIC_MEAN" "$TOPIC_MIN" "$TOPIC_MAX"
-        until_ms=$((now + exp_v))
+    reentry)
+      start_topic "$REENTRY" last_reentry
+      ;;
+    shown)
+      if ((now >= until_ms)); then
+        phase=fadeout
+        reveal_ms=$now # start of the fade
+        until_ms=$((now + FADE_MS))
       fi
-    fi
-    ;;
-  gap)
-    if ((now >= until_ms)); then
-      start_topic "$QUOTES" last_talk
-    fi
-    ;;
+      ;;
+    fadeout)
+      if ((now >= until_ms)); then
+        if next_line; then
+          start_typing
+        else
+          phase=gap
+          exp_ms "$TOPIC_MEAN" "$TOPIC_MIN" "$TOPIC_MAX"
+          until_ms=$((now + exp_v))
+        fi
+      fi
+      ;;
+    gap)
+      if ((now >= until_ms)); then
+        start_topic "$QUOTES" last_talk
+      fi
+      ;;
   esac
 }
 
@@ -263,23 +276,23 @@ build_frame() {
   if [[ "$phase" != "gap" ]]; then
     full=$cur
     case "$phase" in
-    typing)
-      n=$(((now - reveal_ms) * CPS / 1000))
-      if ((n >= ${#full})); then
-        phase=shown
-        exp_ms "$LINE_MEAN" "$LINE_MIN" "$LINE_MAX"
-        until_ms=$((now + exp_v))
+      typing)
+        n=$(((now - reveal_ms) * CPS / 1000))
+        if ((n >= ${#full})); then
+          phase=shown
+          exp_ms "$LINE_MEAN" "$LINE_MIN" "$LINE_MAX"
+          until_ms=$((now + exp_v))
+          n=${#full}
+        fi
+        ;;
+      fadeout)
         n=${#full}
-      fi
-      ;;
-    fadeout)
-      n=${#full}
-      fade_alpha=$((65535 - 65535 * (now - reveal_ms) / FADE_MS))
-      ((fade_alpha >= 1)) || fade_alpha=1
-      ;;
-    *)
-      n=${#full}
-      ;;
+        fade_alpha=$((65535 - 65535 * (now - reveal_ms) / FADE_MS))
+        ((fade_alpha >= 1)) || fade_alpha=1
+        ;;
+      *)
+        n=${#full}
+        ;;
     esac
     if ((now < glitch_until_ms)); then
       glitch_text "$full"
@@ -308,7 +321,7 @@ build_frame() {
 }
 
 build_name() {
-  local name="Monika"
+  local name="$DIALOG_NAME"
   if ((now < glitch_until_ms)); then
     glitch_text "$name"
     name=$glitch_v
@@ -334,8 +347,8 @@ publish() {
 next_tick_ms() {
   local t
   case "$phase" in
-  typing | fadeout) t=$((now + POLL_MS)) ;;
-  *) t=$until_ms ;;
+    typing | fadeout) t=$((now + POLL_MS)) ;;
+    *) t=$until_ms ;;
   esac
   # Without glitches next_glitch_ms stays 0, which would clamp every tick to zero and spin
   ((GLITCH && next_glitch_ms < t)) && t=$next_glitch_ms
@@ -366,7 +379,7 @@ wait_ms() {
 # A zombie still answers kill -0, /proc does not lie; stderr first, the error is the shell's
 hyprlock_alive() {
   local state
-  read -r _ _ state _ 2>/dev/null < "/proc/$hyprlock_pid/stat" || return 1
+  read -r _ _ state _ 2>/dev/null <"/proc/$hyprlock_pid/stat" || return 1
   [[ "$state" != "Z" ]]
 }
 
@@ -376,14 +389,16 @@ cmd_lock() {
   : >"$FRAME_FILE"
   : >"$NAME_FILE"
 
-  hyprlock &
+  "$HYPRLOCK" &
   hyprlock_pid=$!
 
   # exec so $JOURNAL_PID is journalctl itself, not a subshell wrapping it.
   # Without glitches nothing reacts to a wrong password, so the follower is pure cost
   if ((GLITCH)); then
     coproc JOURNAL {
-      exec journalctl -f -n 0 -q -t hyprlock -g 'authentication failure' -o cat
+      # The tag is the locker's own name, which is its basename even when it runs
+      # from a store path
+      exec journalctl -f -n 0 -q -t "${HYPRLOCK##*/}" -g 'authentication failure' -o cat
     }
     journal_fd=${JOURNAL[0]}
     trap 'kill "$JOURNAL_PID" 2>/dev/null || true' EXIT
@@ -413,10 +428,10 @@ cmd_lock() {
 }
 
 case "${1:-lock}" in
-lock) cmd_lock ;;
-help | -h | --help) usage ;;
-*)
-  usage >&2
-  exit 1
-  ;;
+  lock) cmd_lock ;;
+  help | -h | --help) usage ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
 esac

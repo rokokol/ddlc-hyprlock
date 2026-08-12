@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# The journal follower, without a journal: prints one wrong-password line after a beat and
+# then holds the pipe open, which is exactly what `journalctl -f` looks like to the engine
+sleep "${STUB_JOURNAL_DELAY:-0.5}"
+if [[ "${STUB_JOURNAL_SILENT:-0}" != 1 ]]; then
+  printf 'pam_unix(hyprlock:auth): authentication failure\n'
+fi
+sleep "${STUB_JOURNAL_HOLD:-30}"

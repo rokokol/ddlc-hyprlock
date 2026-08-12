@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# The locker, as far as the engine cares: something that stays alive and then does not.
+# It never renders anything — the frames the engine publishes are the whole subject here
+sleep "${STUB_HYPRLOCK_SLEEP:-20}"

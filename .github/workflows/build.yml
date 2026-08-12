@@ -1,0 +1,40 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - run: nix build --no-write-lock-file .#ddlc-hyprlock
+      # tests, dist-is-current, conf-shape, module-wiring, scripts-lint
+      - run: nix flake check --no-write-lock-file
+      # The lock screen must stay usable without Nix: install.sh renders the committed conf
+      # under PREFIX, and the engine has to find its assets from its own location alone
+      - name: install.sh works
+        run: |
+          PREFIX=$PWD/out ./install.sh
+          test -f out/share/ddlc-hyprlock/hyprlock.conf
+          ! grep -q '@share@' out/share/ddlc-hyprlock/hyprlock.conf
+          grep -q "$PWD/out/share/ddlc-hyprlock/just-monika.png" out/share/ddlc-hyprlock/hyprlock.conf
+          DDLC_HYPRLOCK_HYPRLOCK=$PWD/tests/stub/hyprlock \
+            STUB_HYPRLOCK_SLEEP=3 \
+            DDLC_HYPRLOCK_GLITCH=0 \
+            DDLC_HYPRLOCK_STATE_DIR=$PWD/state \
+            out/bin/ddlc-hyprlock lock
+          test -s "$PWD/state/frame"
+      - run: nix fmt -- --ci
+
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - run: nix run nixpkgs#shellcheck -- install.sh ddlc-hyprlock.sh tests/run.sh
+      - run: nix run nixpkgs#shfmt -- -d -i 2 -ci install.sh ddlc-hyprlock.sh tests/run.sh

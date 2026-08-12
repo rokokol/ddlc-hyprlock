@@ -1,0 +1,118 @@
+animations {
+    animation = fadeIn, 1, 6, linear
+    animation = fadeOut, 1, 3, linear
+    bezier = linear, 1, 1, 0, 0
+    enabled = true
+}
+background {
+    color = rgb(361B39)
+    monitor = 
+    path = @share@/just-monika.png
+}
+general {
+    hide_cursor = true
+    ignore_empty_input = true
+    text_trim = false
+}
+image {
+    border_size = 0
+    halign = center
+    monitor = 
+    path = @share@/dialog-box.png
+    position = 0, 18
+    rounding = 0
+    size = 1090
+    valign = bottom
+    zindex = 0
+}
+input-field {
+    capslock_color = rgb(F1A796)
+    check_color = rgb(BB5599)
+    dots_spacing = 0.200000
+    dots_text_format = ♥
+    fade_on_empty = false
+    fail_color = rgb(6C4681)
+    fail_text = This isn't it... ($ATTEMPTS)
+    font_color = rgb(BB5599)
+    font_family = Doki
+    halign = center
+    inner_color = rgb(FFFFFF)
+    monitor = 
+    outer_color = rgb(DD77BB)
+    outline_thickness = 4
+    placeholder_text = <i>Give me it...~</i>
+    position = 0, -20
+    rounding = 22
+    size = 380, 64
+    valign = center
+}
+label {
+    color = rgba(FFFFFFff)
+    font_family = Doki
+    font_size = 150
+    halign = center
+    monitor = 
+    position = 0, -70
+    shadow_color = rgba(bf936edd)
+    shadow_passes = 3
+    shadow_size = 6
+    text = $TIME
+    valign = top
+}
+label {
+    color = rgba(FFFFFFe6)
+    font_family = Doki
+    font_size = 30
+    halign = center
+    monitor = 
+    position = 0, -250
+    shadow_color = rgba(9f543caa)
+    shadow_passes = 2
+    shadow_size = 3
+    text = cmd[update:60000] date +"%A, %B %-d" | tr -d '\n' 
+    valign = top
+}
+label {
+    color = rgba(FFFFFFdd)
+    font_family = Doki
+    font_size = 24
+    halign = center
+    monitor = 
+    position = 240, -20
+    shadow_color = rgba(BB5599aa)
+    shadow_passes = 2
+    shadow_size = 3
+    text = $LAYOUT[EN,RU]
+    valign = center
+}
+label {
+    color = rgba(FFFFFFff)
+    font_family = Doki
+    font_size = 28
+    halign = center
+    monitor = 
+    position = -439, 257
+    shadow_boost = 2
+    shadow_color = rgba(BB5599ff)
+    shadow_passes = 2
+    shadow_size = 6
+    text = cmd[update:100] cat "${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc/name"
+    valign = bottom
+    zindex = 2
+}
+label {
+    color = rgba(FFFFFFff)
+    font_family = Doki
+    font_size = 24
+    halign = center
+    monitor = 
+    position = 0, 77
+    shadow_boost = 1.600000
+    shadow_color = rgba(222222ff)
+    shadow_passes = 4
+    shadow_size = 2
+    text = cmd[update:100] cat "${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc/frame"
+    text_align = left
+    valign = bottom
+    zindex = 1
+}
