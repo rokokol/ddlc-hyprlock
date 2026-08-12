@@ -90,7 +90,7 @@ Either way the clearing is on the engine's own clock, in the same loop that rend
 Two things in a line are substituted, both of them things she says about the machine she is on:
 
 - `[player]` — `$USER`, the name she calls you by
-- `[chr]` — `characterFile`, the path she names when she talks about her own character file. It follows `quotesFile`: on this machine that file is where she actually lives, so the path she asks you to back up is one that exists
+- `[chr]` — `characterFile`, the path she names when she talks about her own character file. It follows `quotesFile`: on this machine that file is where she actually lives, so the backup she asks for is one you could make. This is also the one line in the shipped script that is not a verbatim transcription — the game says "the folder called characters" there
 
 ## Install
 

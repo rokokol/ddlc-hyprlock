@@ -1,7 +1,7 @@
-# Реплики Моники из Act 3 (Monika's Talk) — по топикам, один топик = один
-# блок (разделены пустой строкой), одна строка = один текстбокс в игре.
-# Источник: doki-doki-literature-club.fandom.com/wiki/Monika%27s_Talk
-# [player] подставляется скриптом hyprlock-quote.sh из $USER.
+# Monika's Act 3 dialogue, one topic per block (blocks separated by a blank line), one line
+# per textbox in the game. Transcribed from
+# doki-doki-literature-club.fandom.com/wiki/Monika%27s_Talk
+# [player] becomes $USER and [chr] becomes the character file the engine was pointed at.
 
 # Introduction
 Yay, there you are!

@@ -61,7 +61,10 @@ How the screen flashes on a glitch — the text garbles either way:
   DDLC_HYPRLOCK_GLITCH_SHADER  the shader the hyprctl mode sets in
                           decoration:screen_shader. That mode empties the option
                           afterwards instead of restoring it, so a shader of your
-                          own does not survive a glitch
+                          own does not survive a glitch. For the length of the
+                          flash it also turns debug:damage_tracking and debug:vfr
+                          off — an animated shader does not run with them on —
+                          and puts back whatever they were
   DDLC_HYPRLOCK_SHADER    the screen-shader command, which composites the flash
                           over the effect already on screen and puts it back.
                           Missing or non-executable degrades to text-only
@@ -91,10 +94,11 @@ STATE_DIR="${DDLC_HYPRLOCK_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc}"
 GLITCH="${DDLC_HYPRLOCK_GLITCH:-1}"
 HYPRLOCK="${DDLC_HYPRLOCK_HYPRLOCK:-hyprlock}"
 
-# How the whole screen flashes on a glitch. hyprctl sets decoration:screen_shader and empties
-# it again — it does not restore the previous value, so a shader of the user's own does not
-# survive; screen-shader composites the flash over the effect already there and puts it back.
-# Anything else, or a missing tool, leaves the glitch text-only
+# How the whole screen flashes on a glitch. hyprctl sets decoration:screen_shader and empties it
+# again — it does not restore the previous value, so a shader of the user's own does not survive,
+# and it turns damage tracking off for the flash because Hyprland will not animate one otherwise;
+# screen-shader composites the flash over the effect already there and puts it back. Anything
+# else, or a missing tool, leaves the glitch text-only
 FLASH="${DDLC_HYPRLOCK_FLASH:-hyprctl}"
 GLITCH_SHADER="${DDLC_HYPRLOCK_GLITCH_SHADER:-$SHARE/glitch.frag}"
 SCREEN_SHADER="${DDLC_HYPRLOCK_SHADER:-screen-shader}"
@@ -142,7 +146,9 @@ reveal_ms=0
 next_glitch_ms=0
 glitch_until_ms=0
 shader_until_ms=0 # 0 = the screen is not flashing; the main loop clears the shader when due
-journal_fd=""     # stays empty without glitches: then wait_ms just sleeps
+damage_prev=2     # what the flash puts back: Hyprland's defaults until a flash reads the real ones
+vfr_prev=1
+journal_fd="" # stays empty without glitches: then wait_ms just sleeps
 # both are read and written indirectly, by name, from start_topic
 # shellcheck disable=SC2034
 last_talk=0 # index of the previous monika-talk.txt topic (0 = none)
@@ -250,6 +256,20 @@ start_topic() {
   start_typing
 }
 
+# An int option out of hyprctl -> $get_v. getoption prints "int: 2" and "set: true", so one
+# line is the whole parser
+hypr_get_int() {
+  local key val
+  get_v=""
+  while read -r key val _; do
+    if [[ "$key" == "int:" ]]; then
+      get_v=$val
+      break
+    fi
+  done < <(hyprctl getoption "$1" 2>/dev/null)
+  [[ -n "$get_v" ]]
+}
+
 # Start the screen flash. screen-shader times and reverts its own flash, so there is nothing
 # to remember; the hyprctl mode has to be turned off again, and the main loop does that when
 # $shader_until_ms comes due — no background sleeper to outlive the lock
@@ -267,18 +287,25 @@ flash_on() {
       ((shader_until_ms)) && return 0
       [[ -r "$GLITCH_SHADER" ]] || return 0
       command -v hyprctl >/dev/null 2>&1 || return 0
-      hyprctl keyword decoration:screen_shader "$GLITCH_SHADER" >/dev/null 2>&1 || return 0
+      # The shader is animated, and Hyprland refuses a `time` uniform while damage tracking is
+      # on: it raises the error overlay and the effect never moves. So the two debug options go
+      # first, in the same batch as the shader, and their old values are kept to be put back —
+      # unlike the shader slot, those two are not ours to redefine
+      hypr_get_int debug:damage_tracking && damage_prev=$get_v
+      hypr_get_int debug:vfr && vfr_prev=$get_v
+      hyprctl --batch "keyword debug:damage_tracking 0 ; keyword debug:vfr 0 ; keyword decoration:screen_shader $GLITCH_SHADER" >/dev/null 2>&1 || return 0
       shader_until_ms=$((now + GLITCH_SHADER_MS))
       ;;
   esac
 }
 
-# Clear it. [[EMPTY]] rather than what was there before: this mode owns the option outright,
-# which is the price of needing nothing but hyprctl
+# Clear it: the shader slot back to empty, damage tracking and VFR back to whatever they were.
+# [[EMPTY]] rather than the previous shader, because that one option is the one this mode owns
+# outright — the price of needing nothing but hyprctl
 flash_off() {
   ((shader_until_ms)) || return 0
   shader_until_ms=0
-  hyprctl keyword decoration:screen_shader "[[EMPTY]]" >/dev/null 2>&1 || true
+  hyprctl --batch "keyword decoration:screen_shader [[EMPTY]] ; keyword debug:damage_tracking $damage_prev ; keyword debug:vfr $vfr_prev" >/dev/null 2>&1 || true
 }
 
 fire_glitch() {

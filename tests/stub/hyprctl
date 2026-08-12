@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 # Records what the engine would have told Hyprland, so the flash can be observed without a
-# compositor. Prints "ok" like the real one, since the engine treats a failure as "no flash"
+# compositor. getoption is answered the way the real one answers for an unset int option, and
+# in Hyprland's own defaults — the flash reads them to know what to put back
 printf '%s\n' "$*" >>"${STUB_HYPRCTL_LOG:?}"
+
+if [[ "${1:-}" == "getoption" ]]; then
+  case "${2:-}" in
+    debug:damage_tracking) printf 'int: 2\nset: true\n' ;;
+    debug:vfr) printf 'int: 1\nset: true\n' ;;
+    *) printf 'int: 0\nset: false\n' ;;
+  esac
+  exit 0
+fi
+
 echo ok

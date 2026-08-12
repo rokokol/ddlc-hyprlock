@@ -218,11 +218,27 @@ else
   fail "the shader was not set: $(cat "$HYPRCTL_LOG")"
 fi
 
+# Hyprland refuses to animate a shader that reads `time` while damage tracking is on, and puts
+# an error overlay on screen instead — so the flash has to turn it off first, in one batch
+if grep -q "damage_tracking 0 ; keyword debug:vfr 0 ; keyword decoration:screen_shader" "$HYPRCTL_LOG"; then
+  ok "…with damage tracking and VFR turned off ahead of it"
+else
+  fail "the shader was set without them: $(cat "$HYPRCTL_LOG")"
+fi
+
 # The engine clears it on its own clock, without a background sleeper to outlive the lock
 if logged "$HYPRCTL_LOG" "decoration:screen_shader [[EMPTY]]"; then
   ok "…and the flash is cleared again"
 else
   fail "the shader was left on: $(cat "$HYPRCTL_LOG")"
+fi
+
+# Those two are the compositor's settings, not ours: they go back to what they were, which the
+# stub reports as Hyprland's defaults
+if grep -q "screen_shader \[\[EMPTY\]\] ; keyword debug:damage_tracking 2 ; keyword debug:vfr 1" "$HYPRCTL_LOG"; then
+  ok "…and damage tracking and VFR are put back"
+else
+  fail "the debug options were not restored: $(cat "$HYPRCTL_LOG")"
 fi
 stop
 
