@@ -90,7 +90,7 @@ Either way the clearing is on the engine's own clock, in the same loop that rend
 Two things in a line are substituted, both of them things she says about the machine she is on:
 
 - `[player]` — `$USER`, the name she calls you by
-- `[chr]` — `characterFile`, the path she names when she talks about her own character file. It follows `quotesFile`: on this machine that file is where she actually lives, so the backup she asks for is one you could make. This is also the one line in the shipped script that is not a verbatim transcription — the game says "the folder called characters" there
+- `[chr]` — `characterDir`, the folder she names when she talks about where her character file is kept, the way the game names the one called `characters`. It follows the directory `quotesFile` is in: on this machine that folder is the one that actually holds her, so the backup she asks for is one you could make
 
 ## Install
 
@@ -117,7 +117,7 @@ That enables `programs.hyprlock`, writes the whole config, and installs the dial
 | `screenShader` | the [screen-shader](https://github.com/rokokol/hyprland-screen-shader) package, for that mode | `null` |
 | `glitchShader` | the shader `hyprctl` mode sets — a complete Hyprland screen shader, not an effect body | [`shaders/glitch.frag`](shaders/glitch.frag) |
 | `name` | the name on the plate | `Monika` |
-| `characterFile` | what `[chr]` in a line becomes | follows `quotesFile` |
+| `characterDir` | what `[chr]` in a line becomes | the directory `quotesFile` is in |
 | `font` | the font every label and the input field are set in | `Doki` |
 | `background` | the wallpaper behind the lock | `assets/just-monika.png` |
 | `dialogImage` | the dialog box the text sits in | `assets/dialog-box.png` |

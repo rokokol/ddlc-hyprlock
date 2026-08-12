@@ -29,7 +29,7 @@
   withDialog ? true,
   glitch ? withDialog,
   name ? "Monika",
-  characterFile ? null,
+  characterDir ? null,
   font ? "Doki",
   background ? null,
   dialogImage ? null,
@@ -100,10 +100,10 @@ let
       "DDLC_HYPRLOCK_SHADER"
       (lib.getExe screenShader)
     ]
-    ++ lib.optionals (characterFile != null) [
+    ++ lib.optionals (characterDir != null) [
       "--set-default"
       "DDLC_HYPRLOCK_CHR"
-      (toString characterFile)
+      (toString characterDir)
     ]
   );
 in

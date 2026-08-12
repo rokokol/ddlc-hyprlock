@@ -1,7 +1,7 @@
 # Monika's Act 3 dialogue, one topic per block (blocks separated by a blank line), one line
 # per textbox in the game. Transcribed from
 # doki-doki-literature-club.fandom.com/wiki/Monika%27s_Talk
-# [player] becomes $USER and [chr] becomes the character file the engine was pointed at.
+# [player] becomes $USER and [chr] the folder the engine reads these lines from.
 
 # Introduction
 Yay, there you are!

@@ -28,7 +28,7 @@ in
           glitch
           flash
           name
-          characterFile
+          characterDir
           font
           screenShader
           glitchShader
@@ -117,15 +117,16 @@ in
       description = "The name on the plate; it glitches with the text";
     };
 
-    characterFile = lib.mkOption {
+    characterDir = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
-      default = cfg.quotesFile;
-      defaultText = lib.literalExpression "config.ddlc.hyprlock.quotesFile";
-      example = "$HOME/ddlc/game/characters/monika.chr";
+      default = if cfg.quotesFile == null then null else toString (builtins.dirOf cfg.quotesFile);
+      defaultText = lib.literalExpression "the directory config.ddlc.hyprlock.quotesFile is in";
+      example = "$HOME/ddlc/game/characters";
       description = ''
-        What `[chr]` in a line becomes — the path she names when she talks about her own
-        character file. Follows `quotesFile`, which on this machine is where she does in fact
-        live, so the path she names is one you could actually back up
+        What `[chr]` in a line becomes — the folder she names when she talks about where her
+        character file is kept, the way the game names the one called `characters`. Follows the
+        directory `quotesFile` is in, which on this machine is the folder that does in fact
+        hold her, so the backup she asks for is one you could make
       '';
     };
 
@@ -159,7 +160,7 @@ in
       default = null;
       description = ''
         What she talks about: blocks separated by a blank line, `#` lines are comments,
-        `[player]` becomes the user's name and `[chr]` becomes `characterFile`. Defaults to
+        `[player]` becomes the user's name and `[chr]` becomes `characterDir`. Defaults to
         the shipped `assets/monika-talk.txt`, her Act 3 dialogue, which uses `[player]` and no
         `[chr]`
       '';

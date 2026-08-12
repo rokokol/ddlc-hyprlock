@@ -12,7 +12,7 @@ The following are derived from or contain official DDLC assets:
 | --- | --- |
 | `assets/dialog-box.png` | the in-game dialog box, drawn on the lock screen |
 | `assets/just-monika.png` | the background |
-| `assets/monika-talk.txt`, `assets/monika-reentry.txt` | **the game's script**: Monika's Act 3 dialogue and her lines on re-entering the game, transcribed line for line. Nothing here is written in her voice — every line is hers as shipped, with `[player]` left where the game puts the player's name. One line departs from the transcription: where she says her character file is "in the folder called characters", the placeholder `[chr]` takes the phrase's place, so she names a path on the machine she is actually running on |
+| `assets/monika-talk.txt`, `assets/monika-reentry.txt` | **the game's script**: Monika's Act 3 dialogue and her lines on re-entering the game, transcribed line for line. Nothing here is written in her voice — every line is hers as shipped, with `[player]` left where the game puts the player's name. One line departs from the transcription only in what it names: where she says her character file is "in the folder called characters", `[chr]` stands in for the folder name, so she names the folder that holds her on the machine she is running on |
 
 The `Doki` font family the config asks for is Team Salvato's and is **not** shipped here. Without it hyprlock falls back to whatever fontconfig resolves; see the README for how to point the config at another font
 

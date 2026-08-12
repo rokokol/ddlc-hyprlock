@@ -158,11 +158,11 @@ say 'Back it up: [chr]'
 lock
 chr=$(settled) || fail "the [chr] frame never settled"
 stop
-# The default is the quotes file, so the path she names is one that is really there
-if [[ "$chr" == *"$WORK/talk.txt"* && -r "$WORK/talk.txt" ]]; then
-  ok "[chr] became the file her lines are read from"
+# The default is the quotes file's directory, so the folder she names is one that is there
+if [[ "$chr" == *"$WORK"* && "$chr" != *talk.txt* && -d "$WORK" ]]; then
+  ok "[chr] became the folder her lines are read from"
 else
-  fail "[chr] was not substituted: $chr"
+  fail "[chr] was not substituted with a directory: $chr"
 fi
 
 echo "wrapping"

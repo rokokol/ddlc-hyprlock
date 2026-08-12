@@ -45,9 +45,9 @@ What is said and by whom:
   DDLC_HYPRLOCK_QUOTES   the topics file, blocks separated by a blank line
   DDLC_HYPRLOCK_REENTRY  the topics a lock opens with
   DDLC_HYPRLOCK_NAME     the name on the plate (default Monika)
-  DDLC_HYPRLOCK_CHR      what [chr] in a line becomes: the path she names when
-                         she talks about her own character file. Defaults to the
-                         quotes file — the one her lines are read from
+  DDLC_HYPRLOCK_CHR      what [chr] in a line becomes: the folder she names when
+                         she talks about where her character file is kept.
+                         Defaults to the directory the quotes file is in
 
 Behaviour switches:
   DDLC_HYPRLOCK_GLITCH    1 (default) or 0. 0 drops the journal follower and the
@@ -81,9 +81,10 @@ SHARE="$HERE/../share/ddlc-hyprlock"
 QUOTES="${DDLC_HYPRLOCK_QUOTES:-$SHARE/monika-talk.txt}"
 REENTRY="${DDLC_HYPRLOCK_REENTRY:-$SHARE/monika-reentry.txt}"
 DIALOG_NAME="${DDLC_HYPRLOCK_NAME:-Monika}"
-# What [chr] becomes: the path she names when she talks about her own character file. The
-# quotes file by default, because on this machine that is where she actually lives
-CHR_FILE="${DDLC_HYPRLOCK_CHR:-$QUOTES}"
+# What [chr] becomes: the folder she names when she talks about where her character file is
+# kept. The directory her lines are read from by default, because that is the one on this
+# machine that holds her
+CHR_DIR="${DDLC_HYPRLOCK_CHR:-${QUOTES%/*}}"
 
 TEXT_W="${DDLC_HYPRLOCK_TEXT_W:-1114}"
 FONT_PX="${DDLC_HYPRLOCK_FONT_PX:-32}"
@@ -234,7 +235,7 @@ next_line() {
   local line=${topic_lines[0]}
   topic_lines=("${topic_lines[@]:1}")
   line=${line//\[player\]/$USER}
-  line=${line//\[chr\]/$CHR_FILE}
+  line=${line//\[chr\]/$CHR_DIR}
   cur=$(printf '%s\n' "$line" | fold -s -w "$WRAP_CHARS" | sed 's/ *$//')
 }
 

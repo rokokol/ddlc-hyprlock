@@ -90,7 +90,7 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 В строке подставляются две вещи, и обе — то, что она говорит про машину, на которой живёт:
 
 - `[player]` — `$USER`, имя, которым она тебя зовёт
-- `[chr]` — `characterFile`, путь, который она называет, когда говорит про свой файл персонажа. Следует за `quotesFile`: на этой машине она и правда живёт в нём, так что бэкап, который она просит, можно и правда сделать. Это же единственная строка в комплектных репликах, которая не дословная: в игре там "the folder called characters"
+- `[chr]` — `characterDir`, папка, которую она называет, когда говорит, где лежит её файл персонажа — так же, как игра называет папку `characters`. Следует за каталогом, в котором лежит `quotesFile`: на этой машине именно он её и держит, так что бэкап, о котором она просит, можно и правда сделать
 
 ## Установка
 
@@ -117,7 +117,7 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 | `screenShader` | пакет [screen-shader](https://github.com/rokokol/hyprland-screen-shader) — для этого режима | `null` |
 | `glitchShader` | шейдер, который ставит режим `hyprctl`: полный шейдер экрана Hyprland, а не тело эффекта | [`shaders/glitch.frag`](shaders/glitch.frag) |
 | `name` | имя на плашке | `Monika` |
-| `characterFile` | во что превращается `[chr]` в реплике | следует за `quotesFile` |
+| `characterDir` | во что превращается `[chr]` в реплике | каталог, в котором лежит `quotesFile` |
 | `font` | шрифт всех лейблов и поля ввода | `Doki` |
 | `background` | фон под локом | `assets/just-monika.png` |
 | `dialogImage` | сам диалоговый бокс | `assets/dialog-box.png` |
