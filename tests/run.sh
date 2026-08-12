@@ -22,12 +22,16 @@ trap 'rm -rf "$WORK"' EXIT
 
 export HOME="$WORK/home"
 export XDG_RUNTIME_DIR="$WORK/run"
+# A redirected HOME is not enough: a session exports XDG_DATA_HOME, and it is what the
+# default [chr] path is built from
+export XDG_DATA_HOME="$WORK/home/.local/share"
 export PATH="$HERE/stub:$PATH"
 export USER=tester
 mkdir -p "$HOME" "$XDG_RUNTIME_DIR" "$GOLDEN"
 
 STATE="$WORK/state"
 SHADER_LOG="$WORK/shader.log"
+HYPRCTL_LOG="$WORK/hyprctl.log"
 
 # The geometry a 1280x720 dialog box comes out at, so the goldens are the real wrap width
 export DDLC_HYPRLOCK_TEXT_W=1114
@@ -39,6 +43,20 @@ export DDLC_HYPRLOCK_NAME=Monika
 export DDLC_HYPRLOCK_HYPRLOCK="$HERE/stub/hyprlock"
 export DDLC_HYPRLOCK_SHADER="$HERE/stub/screen-shader"
 export STUB_SHADER_LOG="$SHADER_LOG"
+export STUB_HYPRCTL_LOG="$HYPRCTL_LOG"
+
+# A stub that is not executable, or one the PATH does not reach first, silently hands the
+# engine the real tool — and for hyprctl that is a live compositor rather than a log file
+for tool in hyprlock journalctl screen-shader hyprctl; do
+  if [[ ! -x "$HERE/stub/$tool" ]]; then
+    printf 'tests/stub/%s is not executable\n' "$tool" >&2
+    exit 1
+  fi
+  if [[ "$(command -v "$tool")" != "$HERE/stub/$tool" ]]; then
+    printf '%s resolves to %s, not to the stub\n' "$tool" "$(command -v "$tool")" >&2
+    exit 1
+  fi
+done
 
 fails=0
 
@@ -62,8 +80,19 @@ say() {
 lock() {
   rm -rf "$STATE"
   : >"$SHADER_LOG"
+  : >"$HYPRCTL_LOG"
   "$ENGINE" lock &
   engine_pid=$!
+}
+
+# Wait for a line to turn up in a stub's log, up to $2 tenths of a second
+logged() {
+  local file=$1 pattern=$2 tries=${3:-60} i
+  for ((i = 0; i < tries; i++)); do
+    grep -qF "$pattern" "$file" 2>/dev/null && return 0
+    sleep 0.1
+  done
+  return 1
 }
 
 settled() {
@@ -125,6 +154,17 @@ else
   fail "[player] was not substituted"
 fi
 
+say 'Back it up: [chr]'
+lock
+chr=$(settled) || fail "the [chr] frame never settled"
+stop
+# Dialogue, not a file: nothing creates the path, so the check is only that it is spelled out
+if [[ "$chr" == *"$HOME/.local/share/ddlc-hyprlock/monika.chr"* ]]; then
+  ok "[chr] became the path she names"
+else
+  fail "[chr] was not substituted: $chr"
+fi
+
 echo "wrapping"
 
 say 'Ah, you are back! I kept the club running while you were away, you know — someone has to.'
@@ -145,24 +185,16 @@ fi
 echo "glitches"
 
 export DDLC_HYPRLOCK_GLITCH=1
+export DDLC_HYPRLOCK_FLASH=screen-shader
 say 'Hi, [player]! & <3'
 lock
-for _ in $(seq 60); do
-  [[ -s "$SHADER_LOG" ]] && break
-  sleep 0.1
-done
+logged "$SHADER_LOG" "flash glitch" || fail "the journal line did not reach screen-shader"
 # Read the frame while the glitch is still on — the text garbles for seconds after the flash
 glitched=$(cat "$STATE/frame" 2>/dev/null || true)
 stop
 
-if [[ -s "$SHADER_LOG" ]]; then
-  ok "a wrong password in the journal flashes the screen"
-else
-  fail "the journal line did not reach screen-shader"
-fi
-
 if grep -q '^flash glitch' "$SHADER_LOG"; then
-  ok "…as a glitch flash"
+  ok "a wrong password flashes the screen through screen-shader"
 else
   fail "screen-shader was called as: $(cat "$SHADER_LOG")"
 fi
@@ -173,6 +205,48 @@ if printf '%s' "$glitched" | tr -d '\n' | LC_ALL=C grep -q '[^ -~]'; then
   ok "the text is garbled while the glitch lasts"
 else
   fail "the frame carries no mojibake through a glitch"
+fi
+
+echo "the flash through hyprctl"
+
+export DDLC_HYPRLOCK_FLASH=hyprctl
+lock
+# The path is the packaged shader's, so the name is what both a store path and a checkout share
+if logged "$HYPRCTL_LOG" "keyword decoration:screen_shader" && grep -q "glitch.frag" "$HYPRCTL_LOG"; then
+  ok "the glitch sets the shader"
+else
+  fail "the shader was not set: $(cat "$HYPRCTL_LOG")"
+fi
+
+# The engine clears it on its own clock, without a background sleeper to outlive the lock
+if logged "$HYPRCTL_LOG" "decoration:screen_shader [[EMPTY]]"; then
+  ok "…and the flash is cleared again"
+else
+  fail "the shader was left on: $(cat "$HYPRCTL_LOG")"
+fi
+stop
+
+# A lock killed mid-flash must not leave the whole screen glitched
+: >"$HYPRCTL_LOG"
+lock
+logged "$HYPRCTL_LOG" "glitch.frag" || fail "the shader was not set before the kill"
+stop
+if grep -qF "decoration:screen_shader [[EMPTY]]" "$HYPRCTL_LOG"; then
+  ok "a lock that dies mid-flash still clears the shader"
+else
+  fail "the shader outlived the engine: $(cat "$HYPRCTL_LOG")"
+fi
+
+echo "no flash at all"
+
+export DDLC_HYPRLOCK_FLASH=none
+lock
+sleep 2
+stop
+if [[ ! -s "$HYPRCTL_LOG" && ! -s "$SHADER_LOG" ]]; then
+  ok "flash = none touches neither hyprctl nor screen-shader"
+else
+  fail "something was called anyway: $(cat "$HYPRCTL_LOG" "$SHADER_LOG")"
 fi
 
 echo "the locker owns the lock"

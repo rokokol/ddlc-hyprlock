@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Records what the engine would have told Hyprland, so the flash can be observed without a
+# compositor. Prints "ok" like the real one, since the engine treats a failure as "no flash"
+printf '%s\n' "$*" >>"${STUB_HYPRCTL_LOG:?}"
+echo ok

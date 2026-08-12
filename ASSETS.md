@@ -12,9 +12,11 @@ The following are derived from or contain official DDLC assets:
 | --- | --- |
 | `assets/dialog-box.png` | the in-game dialog box, drawn on the lock screen |
 | `assets/just-monika.png` | the background |
-| `assets/monika-talk.txt`, `assets/monika-reentry.txt` | in-game dialogue, what the box types out |
+| `assets/monika-talk.txt`, `assets/monika-reentry.txt` | **the game's script**: Monika's Act 3 dialogue and her lines on re-entering the game, transcribed line for line. Nothing here is written in her voice — every line is hers as shipped, with `[player]` left where the game puts the player's name |
 
 The `Doki` font family the config asks for is Team Salvato's and is **not** shipped here. Without it hyprlock falls back to whatever fontconfig resolves; see the README for how to point the config at another font
+
+`shaders/glitch.frag` is not a game asset — it is a GLSL effect of my own, MIT like the rest of the code, and the same one [rokokol/hyprland-screen-shader](https://github.com/rokokol/hyprland-screen-shader) ships as a composable body
 
 The colours are measured off [ddlc.moe](https://ddlc.moe) by [ddlc-palette](https://github.com/rokokol/ddlc-palette) and are theirs too
 

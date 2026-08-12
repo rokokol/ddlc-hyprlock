@@ -18,13 +18,18 @@
   palette,
   # The locker to run. null leaves it to whatever `hyprlock` is on PATH at lock time
   hyprlock ? null,
-  # The screen-shader command for the full-screen flash; null keeps the glitch text-only
+  # How the whole screen flashes on a glitch: "hyprctl" sets the shipped shader and clears it
+  # again, "screen-shader" hands the flash to that command, "none" leaves the glitch text-only
+  flash ? "hyprctl",
+  # Only read by the screen-shader mode; that command has to come from the caller
   screenShader ? null,
+  glitchShader ? null,
   # withDialog, not dialog: callPackage fills any argument nixpkgs has an attribute for, and
   # `pkgs.dialog` is the TUI — the default would silently become a package
   withDialog ? true,
   glitch ? withDialog,
   name ? "Monika",
+  characterFile ? null,
   font ? "Doki",
   background ? null,
   dialogImage ? null,
@@ -51,6 +56,7 @@ let
     "dialog-box.png" = file "dialog-box.png" ../assets/dialog-box.png;
     "monika-talk.txt" = file "monika-talk.txt" ../assets/monika-talk.txt;
     "monika-reentry.txt" = file "monika-reentry.txt" ../assets/monika-reentry.txt;
+    "glitch.frag" = file "glitch.frag" ../shaders/glitch.frag;
   };
 
   share = "$out/share/ddlc-hyprlock";
@@ -94,6 +100,11 @@ let
       "DDLC_HYPRLOCK_SHADER"
       (lib.getExe screenShader)
     ]
+    ++ lib.optionals (characterFile != null) [
+      "--set-default"
+      "DDLC_HYPRLOCK_CHR"
+      (toString characterFile)
+    ]
   );
 in
 
@@ -133,6 +144,8 @@ stdenvNoCC.mkDerivation {
       --set-default DDLC_HYPRLOCK_FONT_PX ${toString config.fontPx} \
       --set-default DDLC_HYPRLOCK_POLL_MS ${toString pollMs} \
       --set-default DDLC_HYPRLOCK_GLITCH ${if glitch then "1" else "0"} \
+      --set-default DDLC_HYPRLOCK_FLASH ${lib.escapeShellArg flash} \
+      --set-default DDLC_HYPRLOCK_GLITCH_SHADER ${pick glitchShader "glitch.frag"} \
       ${extraFlags}
 
     runHook postInstall

@@ -26,9 +26,12 @@ in
       default = self.packages.${pkgs.stdenv.hostPlatform.system}.ddlc-hyprlock.override {
         inherit (cfg)
           glitch
+          flash
           name
+          characterFile
           font
           screenShader
+          glitchShader
           stateDir
           pollMs
           placeholderText
@@ -62,8 +65,29 @@ in
       defaultText = lib.literalExpression "config.ddlc.hyprlock.dialog";
       description = ''
         Garble the dialog on a wrong password and at random intervals. Adds a journal
-        follower; the full-screen flash also needs `screenShader`, and degrades to
-        text-only garbling without it
+        follower; whether the whole screen flashes along with the text is `flash`
+      '';
+    };
+
+    flash = lib.mkOption {
+      type = lib.types.enum [
+        "hyprctl"
+        "screen-shader"
+        "none"
+      ];
+      default = if cfg.screenShader != null then "screen-shader" else "hyprctl";
+      defaultText = lib.literalExpression ''"screen-shader" when screenShader is set, else "hyprctl"'';
+      description = ''
+        How the whole screen flashes on a glitch — the text garbles either way:
+
+        - `hyprctl` sets `glitchShader` and clears the option again when the flash is over.
+          It needs nothing but Hyprland, and it **owns** `decoration:screen_shader` while it
+          runs: anything else you had in there is gone after the first glitch
+        - `screen-shader` hands the flash to
+          [screen-shader](https://github.com/rokokol/hyprland-screen-shader), which composites
+          it over the effect already on screen and puts that back afterwards. Set
+          `screenShader` to its package
+        - `none` leaves the glitch text-only
       '';
     };
 
@@ -72,8 +96,17 @@ in
       default = null;
       example = lib.literalExpression "config.programs.screen-shader.package";
       description = ''
-        The [screen-shader](https://github.com/rokokol/hyprland-screen-shader) command that
-        flashes the whole screen on a glitch. Without it the glitch is text-only
+        The [screen-shader](https://github.com/rokokol/hyprland-screen-shader) package, for
+        `flash = "screen-shader"` — which is what setting this selects by default
+      '';
+    };
+
+    glitchShader = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        The shader `flash = "hyprctl"` sets, a complete Hyprland screen shader rather than an
+        effect body. Defaults to the shipped one
       '';
     };
 
@@ -81,6 +114,17 @@ in
       type = lib.types.str;
       default = "Monika";
       description = "The name on the plate; it glitches with the text";
+    };
+
+    characterFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "$HOME/ddlc/game/characters/monika.chr";
+      description = ''
+        What `[chr]` in a line becomes — the path she names when she talks about her own
+        character file. Nothing creates it and nothing reads it: this is dialogue, not a file.
+        Defaults to `$XDG_DATA_HOME/ddlc-hyprlock/<name>.chr`
+      '';
     };
 
     font = lib.mkOption {
@@ -112,8 +156,9 @@ in
       type = lib.types.nullOr lib.types.path;
       default = null;
       description = ''
-        What she talks about: blocks separated by a blank line, `#` lines are comments and
-        `[player]` becomes the user's name. Defaults to the shipped in-game dialogue
+        What she talks about: blocks separated by a blank line, `#` lines are comments,
+        `[player]` becomes the user's name and `[chr]` becomes `characterFile`. Defaults to
+        the shipped Act 3 dialogue, which uses `[player]` and no `[chr]`
       '';
     };
 
@@ -172,6 +217,25 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = cfg.flash != "screen-shader" || cfg.screenShader != null;
+        message = ''
+          ddlc.hyprlock.flash = "screen-shader" needs ddlc.hyprlock.screenShader set to that
+          package — the engine cannot guess a command it does not ship. Use flash = "hyprctl"
+          for a flash with no dependency
+        '';
+      }
+    ];
+
+    # Either flash paints the whole screen, which only a compositor can do — hyprlock draws
+    # its own surface and nothing else. Said as a warning, not an assertion: a lock screen on
+    # a Hyprland this configuration does not itself enable is a legitimate setup
+    warnings =
+      lib.optional
+        (cfg.dialog && cfg.glitch && cfg.flash != "none" && !config.wayland.windowManager.hyprland.enable)
+        "ddlc.hyprlock.flash = \"${cfg.flash}\" flashes the whole screen through Hyprland, which this configuration does not enable. Without it the glitch stays text-only";
+
     # Only the dialog needs the engine on PATH; the theme alone is just a config file
     home.packages = lib.optional cfg.dialog cfg.package;
 

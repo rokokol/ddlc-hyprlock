@@ -16,6 +16,16 @@ let
           type = lib.types.listOf lib.types.package;
           default = [ ];
         };
+        assertions = lib.mkOption {
+          type = lib.types.listOf lib.types.unspecified;
+          default = [ ];
+        };
+        warnings = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+        };
+        # The flash needs a compositor, so the module reads whether there is one
+        wayland.windowManager.hyprland.enable = lib.mkEnableOption "hyprland";
         programs.hyprlock.enable = lib.mkEnableOption "hyprlock";
         programs.hyprlock.package = lib.mkOption {
           type = lib.types.package;
@@ -39,7 +49,27 @@ let
       specialArgs = { inherit pkgs; };
     }).config;
 
-  on = eval { ddlc.hyprlock.enable = true; };
+  on = eval {
+    ddlc.hyprlock.enable = true;
+    wayland.windowManager.hyprland.enable = true;
+  };
+  # A flash without a compositor to paint it is a warning, not an error
+  noCompositor = eval { ddlc.hyprlock.enable = true; };
+  # Handing the flash to screen-shader without handing over the package is an error
+  shaderless = eval {
+    ddlc.hyprlock = {
+      enable = true;
+      flash = "screen-shader";
+    };
+    wayland.windowManager.hyprland.enable = true;
+  };
+  withShader = eval {
+    ddlc.hyprlock = {
+      enable = true;
+      screenShader = pkgs.hello;
+    };
+    wayland.windowManager.hyprland.enable = true;
+  };
   plain = eval {
     ddlc.hyprlock = {
       enable = true;
@@ -76,6 +106,15 @@ in
   font = (builtins.head on.programs.hyprlock.settings.label).font_family;
 
   lockCommand = on.ddlc.hyprlock.lockCommand;
+
+  # Nothing to install and nothing to say when the flash needs no help
+  flash = on.ddlc.hyprlock.flash;
+  warnings = on.warnings;
+  failedAssertions = map (a: a.message) (builtins.filter (a: !a.assertion) on.assertions);
+  # Setting the package is what selects that mode, so it is not said twice
+  shaderFlash = withShader.ddlc.hyprlock.flash;
+  noCompositorWarnings = builtins.length noCompositor.warnings;
+  shaderlessAssertions = builtins.length (builtins.filter (a: !a.assertion) shaderless.assertions);
 
   # Without the dialog nothing polls a state directory and nothing needs the engine
   plainLabels = labels plain;

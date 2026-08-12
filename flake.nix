@@ -167,6 +167,16 @@
                 want '.font == "Doki"' "the font does not reach the labels"
                 want '.lockCommand | test("ddlc-hyprlock.*lock$")' "a lock does not run the engine"
 
+                # The flash that needs nothing is the default, and it stays quiet
+                want '.flash == "hyprctl"' "the default flash is not the dependency-free one"
+                want '.warnings == []' "a flash on Hyprland warns about something"
+                want '.failedAssertions == []' "the default configuration does not hold"
+                # Handing over the package is what picks that mode — no second option to set
+                want '.shaderFlash == "screen-shader"' "the screen-shader package does not select its mode"
+                # …and picking it without the package has to fail loudly rather than silently
+                want '.shaderlessAssertions == 1' "screen-shader without the package is accepted"
+                want '.noCompositorWarnings == 1' "a flash with no compositor to paint it is not flagged"
+
                 # dialog = false is the whole point of the option: no engine, no polling
                 want '.plainLabels == 3' "the plain lock still carries dialog labels"
                 want '.plainImages == 0' "the plain lock still draws the dialog box"

@@ -26,11 +26,10 @@ the whole life of the line, and the text is pinned in place without any font
 measurements; line wrapping is just a fold by character count
 
 Glitches are a single mechanism for a wrong password and spontaneous firings (a
-Poisson stream): the screen glitches via `screen-shader flash glitch`
-(composited over the active effect), at the same time the name and text are
-garbled with a "broken encoding"; the text glitches longer than the shader. A
-wrong password arrives as a line from a `journalctl -f` follower, which is also
-what the loop sleeps on — so it reacts at once without polling the journal
+Poisson stream): the name and the text are garbled with a "broken encoding" and
+the whole screen flashes, the text for longer than the screen. A wrong password
+arrives as a line from a `journalctl -f` follower, which is also what the loop
+sleeps on — so it reacts at once without polling the journal
 
 Geometry has to be the same numbers the hyprlock config laid the text area out
 at, so it comes from the environment rather than from a guess here:
@@ -46,14 +45,25 @@ What is said and by whom:
   DDLC_HYPRLOCK_QUOTES   the topics file, blocks separated by a blank line
   DDLC_HYPRLOCK_REENTRY  the topics a lock opens with
   DDLC_HYPRLOCK_NAME     the name on the plate (default Monika)
+  DDLC_HYPRLOCK_CHR      what [chr] in a line becomes: the path she names when
+                         she talks about her own character file. Nothing creates
+                         it — it is dialogue, not a file this reads
 
 Behaviour switches:
   DDLC_HYPRLOCK_GLITCH    1 (default) or 0. 0 drops the journal follower and the
                           random glitch stream — the dialog still types, it just
                           never garbles
-  DDLC_HYPRLOCK_SHADER    the screen-shader command for the full-screen flash.
-                          Missing or non-executable degrades it to text-only
   DDLC_HYPRLOCK_HYPRLOCK  the locker to run (default hyprlock on PATH)
+
+How the screen flashes on a glitch — the text garbles either way:
+  DDLC_HYPRLOCK_FLASH     hyprctl (default), screen-shader, or anything else for
+                          no flash at all
+  DDLC_HYPRLOCK_GLITCH_SHADER  the shader the hyprctl mode sets, and clears again
+                          afterwards: that mode owns decoration:screen_shader, so
+                          whatever else was in it is gone
+  DDLC_HYPRLOCK_SHADER    the screen-shader command, which composites the flash
+                          over the effect already on screen and puts it back.
+                          Missing or non-executable degrades to text-only
 
 State is plain shell variables for the lifetime of the lock, so a fresh run is
 by definition a fresh lock and starts the dialog from the re-entry line
@@ -67,16 +77,26 @@ SHARE="$HERE/../share/ddlc-hyprlock"
 QUOTES="${DDLC_HYPRLOCK_QUOTES:-$SHARE/monika-talk.txt}"
 REENTRY="${DDLC_HYPRLOCK_REENTRY:-$SHARE/monika-reentry.txt}"
 DIALOG_NAME="${DDLC_HYPRLOCK_NAME:-Monika}"
+# What [chr] becomes: the path she names when she talks about her own character file.
+# Nothing here creates it — it is a line of dialogue, not a file the engine reads
+CHR_FILE="${DDLC_HYPRLOCK_CHR:-${XDG_DATA_HOME:-$HOME/.local/share}/ddlc-hyprlock/${DIALOG_NAME,,}.chr}"
 
 TEXT_W="${DDLC_HYPRLOCK_TEXT_W:-1114}"
 FONT_PX="${DDLC_HYPRLOCK_FONT_PX:-32}"
 STATE_DIR="${DDLC_HYPRLOCK_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc}"
 
 # 0 drops the journal follower and the spontaneous-glitch stream: the dialog still types,
-# it just never garbles. The full-screen flash additionally needs screen-shader
+# it just never garbles. The full-screen flash is a separate mechanism on top
 GLITCH="${DDLC_HYPRLOCK_GLITCH:-1}"
-SCREEN_SHADER="${DDLC_HYPRLOCK_SHADER:-screen-shader}"
 HYPRLOCK="${DDLC_HYPRLOCK_HYPRLOCK:-hyprlock}"
+
+# How the whole screen flashes on a glitch, and who owns decoration:screen_shader while it
+# does: hyprctl takes the option over and clears it afterwards, so whatever was in it is
+# gone; screen-shader composites the flash over the effect already there and puts it back.
+# Anything else, or a missing tool, leaves the glitch text-only
+FLASH="${DDLC_HYPRLOCK_FLASH:-hyprctl}"
+GLITCH_SHADER="${DDLC_HYPRLOCK_GLITCH_SHADER:-$SHARE/glitch.frag}"
+SCREEN_SHADER="${DDLC_HYPRLOCK_SHADER:-screen-shader}"
 
 # Doki metrics relative to the font size: at 32px a glyph averages 15px, space 8px
 AVG_ADV=$((FONT_PX * 15 / 32))
@@ -97,7 +117,7 @@ TOPIC_MAX=300
 GLITCH_MEAN=120 # spontaneous glitches: Exp(1/120) intervals, sec
 GLITCH_MIN=15
 GLITCH_MAX=600
-GLITCH_SHADER_SEC=1.2 # glitch shader duration
+GLITCH_SHADER_MS=1200 # how long the screen flashes
 GLITCH_TEXT_MS=3600   # the text glitches longer than the shader
 
 FADE_MS=600 # smooth fade-out of a line
@@ -120,7 +140,8 @@ until_ms=0
 reveal_ms=0
 next_glitch_ms=0
 glitch_until_ms=0
-journal_fd="" # stays empty without glitches: then wait_ms just sleeps
+shader_until_ms=0 # 0 = the screen is not flashing; the main loop clears the shader when due
+journal_fd=""     # stays empty without glitches: then wait_ms just sleeps
 # both are read and written indirectly, by name, from start_topic
 # shellcheck disable=SC2034
 last_talk=0 # index of the previous monika-talk.txt topic (0 = none)
@@ -205,8 +226,9 @@ next_line() {
   ((${#topic_lines[@]})) || return 1
   local line=${topic_lines[0]}
   topic_lines=("${topic_lines[@]:1}")
-  cur=$(printf '%s\n' "${line//\[player\]/$USER}" |
-    fold -s -w "$WRAP_CHARS" | sed 's/ *$//')
+  line=${line//\[player\]/$USER}
+  line=${line//\[chr\]/$CHR_FILE}
+  cur=$(printf '%s\n' "$line" | fold -s -w "$WRAP_CHARS" | sed 's/ *$//')
 }
 
 start_typing() {
@@ -227,13 +249,41 @@ start_topic() {
   start_typing
 }
 
+# Start the screen flash. screen-shader times and reverts its own flash, so there is nothing
+# to remember; the hyprctl mode has to be turned off again, and the main loop does that when
+# $shader_until_ms comes due — no background sleeper to outlive the lock
+flash_on() {
+  case "$FLASH" in
+    screen-shader)
+      # command -v, not -x: it may be a bare command name on PATH
+      command -v "$SCREEN_SHADER" >/dev/null 2>&1 || return 0
+      local sec
+      printf -v sec '%d.%03d' $((GLITCH_SHADER_MS / 1000)) $((GLITCH_SHADER_MS % 1000))
+      "$SCREEN_SHADER" flash glitch "$sec" </dev/null >/dev/null 2>&1 &
+      ;;
+    hyprctl)
+      # Already flashing: re-arming would race the clear for the option
+      ((shader_until_ms)) && return 0
+      [[ -r "$GLITCH_SHADER" ]] || return 0
+      command -v hyprctl >/dev/null 2>&1 || return 0
+      hyprctl keyword decoration:screen_shader "$GLITCH_SHADER" >/dev/null 2>&1 || return 0
+      shader_until_ms=$((now + GLITCH_SHADER_MS))
+      ;;
+  esac
+}
+
+# Clear it. [[EMPTY]] rather than what was there before: this mode owns the option outright,
+# which is the price of needing nothing but hyprctl
+flash_off() {
+  ((shader_until_ms)) || return 0
+  shader_until_ms=0
+  hyprctl keyword decoration:screen_shader "[[EMPTY]]" >/dev/null 2>&1 || true
+}
+
 fire_glitch() {
   glitch_until_ms=$((now + GLITCH_TEXT_MS))
-  # Text garbling is self-contained; the screen flash is an optional extra.
-  # command -v, not -x: SCREEN_SHADER may be a bare command name on PATH
-  command -v "$SCREEN_SHADER" >/dev/null 2>&1 || return 0
-  "$SCREEN_SHADER" flash glitch "$GLITCH_SHADER_SEC" \
-    </dev/null >/dev/null 2>&1 &
+  # Text garbling is self-contained; the screen flash is an optional extra
+  flash_on
 }
 
 # Advance the state machine: reentry -> typing -> shown -> fadeout -> typing|gap.
@@ -353,6 +403,8 @@ next_tick_ms() {
   # Without glitches next_glitch_ms stays 0, which would clamp every tick to zero and spin
   ((GLITCH && next_glitch_ms < t)) && t=$next_glitch_ms
   ((glitch_until_ms > now && now + POLL_MS < t)) && t=$((now + POLL_MS))
+  # The flash is cleared by this loop, so it has to wake up for it
+  ((shader_until_ms && shader_until_ms < t)) && t=$shader_until_ms
   ((t > now + IDLE_CAP_MS)) && t=$((now + IDLE_CAP_MS))
   ((t < now)) && t=$now
   tick_v=$((t - now))
@@ -392,6 +444,10 @@ cmd_lock() {
   "$HYPRLOCK" &
   hyprlock_pid=$!
 
+  # Dying with the flash still on would leave the whole screen glitched, and the follower
+  # outliving us would keep reading the journal for nothing
+  trap 'flash_off; [[ -n "${JOURNAL_PID:-}" ]] && kill "$JOURNAL_PID" 2>/dev/null; true' EXIT
+
   # exec so $JOURNAL_PID is journalctl itself, not a subshell wrapping it.
   # Without glitches nothing reacts to a wrong password, so the follower is pure cost
   if ((GLITCH)); then
@@ -401,11 +457,13 @@ cmd_lock() {
       exec journalctl -f -n 0 -q -t "${HYPRLOCK##*/}" -g 'authentication failure' -o cat
     }
     journal_fd=${JOURNAL[0]}
-    trap 'kill "$JOURNAL_PID" 2>/dev/null || true' EXIT
   fi
 
   while hyprlock_alive; do
     set_now
+
+    # The flash is on a clock of its own: nothing else in the loop times it out
+    ((shader_until_ms && now >= shader_until_ms)) && flash_off
 
     # Spontaneous glitches: a Poisson stream. 0 means not scheduled yet, then we
     # only assign the first interval, without firing
