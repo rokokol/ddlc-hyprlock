@@ -293,8 +293,10 @@ flash_on() {
       # unlike the shader slot, those two are not ours to redefine
       hypr_get_int debug:damage_tracking && damage_prev=$get_v
       hypr_get_int debug:vfr && vfr_prev=$get_v
-      hyprctl --batch "keyword debug:damage_tracking 0 ; keyword debug:vfr 0 ; keyword decoration:screen_shader $GLITCH_SHADER" >/dev/null 2>&1 || return 0
+      # Armed before the call, not after: the EXIT trap clears the flash by this variable, and
+      # a signal landing between the two would otherwise leave the shader on the screen for good
       shader_until_ms=$((now + GLITCH_SHADER_MS))
+      hyprctl --batch "keyword debug:damage_tracking 0 ; keyword debug:vfr 0 ; keyword decoration:screen_shader $GLITCH_SHADER" >/dev/null 2>&1 || shader_until_ms=0
       ;;
   esac
 }
