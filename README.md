@@ -11,8 +11,6 @@
 [![license](https://img.shields.io/badge/MIT-3DA639?style=flat)](LICENSE)
 [![build](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/build.yml/badge.svg)](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/build.yml)
 
-[Русский](README.ru.md)
-
 </div>
 
 Every colour is a measured one out of [ddlc-palette](https://github.com/rokokol/ddlc-palette), which reads them off [ddlc.moe](https://ddlc.moe) — nothing here is eyeballed
