@@ -53,6 +53,8 @@ The line types out a character at a time, wraps inside the box when it is too lo
 
 ![The dialog box typing a line, wrapping the next one and garbling in between](docs/dialog.gif)
 
+*[the full recording](docs/demo.mp4) — forty seconds of her talking*
+
 A wrong password is a glitch with a reason: the plate and the line break up, and the field says as much
 
 ![A wrong password: the name and the line garbled, the field reading "This isn't it... (1)"](docs/glitch.jpg)
@@ -188,6 +190,7 @@ ddlc-hyprlock.sh     the dialog engine
 assets/              the background, the dialog box, and what she says
 shaders/glitch.frag  the flash, for the mode that needs no dependency
 dist/                the rendered config, committed for consumers without Nix
+docs/                the screenshots and the recording the README shows
 tests/run.sh         the engine's suite, with stubs and goldens
 install.sh           for systems without Nix
 ```
