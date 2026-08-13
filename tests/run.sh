@@ -96,11 +96,15 @@ logged() {
   return 1
 }
 
+# The frame the line ends up at. "Stopped changing" alone is not that frame: the engine
+# renders on its own clock, and a runner that starves it for a few hundred milliseconds
+# hands back a half-typed frame that was read five times running. The untyped tail is the
+# tell — it lives in a transparent span, so a frame still carrying one is mid-typing
 settled() {
   local prev="" cur="" same=0 i
   for ((i = 0; i < 400; i++)); do
     cur=$(cat "$STATE/frame" 2>/dev/null || true)
-    if [[ -n "$cur" && "$cur" == "$prev" ]]; then
+    if [[ -n "$cur" && "$cur" == "$prev" && "$cur" != *'<span alpha="1">'* ]]; then
       same=$((same + 1))
       if ((same >= 5)); then
         printf '%s' "$cur"
