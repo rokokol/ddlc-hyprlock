@@ -172,11 +172,14 @@ bind = SUPER, F12, exec, loginctl lock-session
 ```sh
 tests/run.sh            # the engine, against a stub locker, journal, hyprctl and screen-shader
 tests/run.sh --update   # rewrite the goldens
+tests/live.sh           # the rendered config through the real hyprlock, without locking
 ```
 
 The suite drives the packaged command rather than the script, since the wrapper's defaults are half of what there is to get wrong, and it isolates `HOME`, `XDG_RUNTIME_DIR` and `XDG_DATA_HOME` — a session exports the last two, and the engine would otherwise publish frames into the live lock's state directory. It also refuses to run unless every stub is executable and first on `PATH`: a stub that is neither hands the test the real tool, and for `hyprctl` that means a live compositor instead of a log file
 
 `nix flake check` runs that plus: `dist/` is what the package would render, the packaged config has no placeholder left in it and reads the state files, and the Home Manager module is evaluated against option stubs — with the dialog on and off, because a plain lock has to be genuinely plain, and with a flash that has no compositor or no package behind it, because that is a warning and an error respectively
+
+The stub locker sleeps and reads nothing, so none of that says whether hyprlock itself accepts the config. `tests/live.sh` hands it to the real binary and points it at a display that does not exist — hyprlock parses its config before it connects, so the parse happens and no lock does — then runs the engine and checks that every path the config `cat`s is one the loop actually writes. It needs the real locker, so it never runs in CI
 
 ## Layout
 

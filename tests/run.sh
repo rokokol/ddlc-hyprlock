@@ -47,12 +47,13 @@ export STUB_HYPRCTL_LOG="$HYPRCTL_LOG"
 
 # A stub that is not executable, or one the PATH does not reach first, silently hands the
 # engine the real tool — and for hyprctl that is a live compositor rather than a log file
-for tool in hyprlock journalctl screen-shader hyprctl; do
-  if [[ ! -x "$HERE/stub/$tool" ]]; then
+for stub in "$HERE"/stub/*; do
+  tool=$(basename "$stub")
+  if [[ ! -x $stub ]]; then
     printf 'tests/stub/%s is not executable\n' "$tool" >&2
     exit 1
   fi
-  if [[ "$(command -v "$tool")" != "$HERE/stub/$tool" ]]; then
+  if [[ "$(command -v "$tool")" != "$stub" ]]; then
     printf '%s resolves to %s, not to the stub\n' "$tool" "$(command -v "$tool")" >&2
     exit 1
   fi

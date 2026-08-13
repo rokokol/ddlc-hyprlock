@@ -201,7 +201,7 @@
                 ];
               }
               ''
-                files="${engine} ${testsDir}/run.sh ${installer}"
+                files="${engine} ${testsDir}/run.sh ${testsDir}/live.sh ${installer}"
                 # shellcheck disable=SC2086
                 shellcheck $files
                 # shellcheck disable=SC2086
