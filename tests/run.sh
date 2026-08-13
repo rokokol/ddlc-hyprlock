@@ -194,8 +194,16 @@ export DDLC_HYPRLOCK_FLASH=screen-shader
 say 'Hi, [player]! & <3'
 lock
 logged "$SHADER_LOG" "flash glitch" || fail "the journal line did not reach screen-shader"
-# Read the frame while the glitch is still on — the text garbles for seconds after the flash
-glitched=$(cat "$STATE/frame" 2>/dev/null || true)
+# The flash and the garbled text are not the same instant: the shader is set as the journal
+# line arrives, the text garbles on the loop's next render. So wait for it rather than read
+# once — it stays garbled for GLITCH_TEXT_MS, which is seconds, and the poll costs nothing
+# when it is already there
+glitched=""
+for _ in $(seq 40); do
+  glitched=$(cat "$STATE/frame" 2>/dev/null || true)
+  printf '%s' "$glitched" | tr -d '\n' | LC_ALL=C grep -q '[^ -~]' && break
+  sleep 0.05
+done
 stop
 
 if grep -q '^flash glitch' "$SHADER_LOG"; then
