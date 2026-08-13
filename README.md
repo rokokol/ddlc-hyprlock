@@ -51,7 +51,7 @@ The line types out a character at a time, wraps inside the box when it is too lo
 
 ![The dialog box typing a line, wrapping the next one and garbling in between](docs/dialog.gif)
 
-_[the full recording](docs/demo.mp4)_
+*[the full recording](docs/demo.mp4)*
 
 A wrong password is a glitch with a reason: the plate and the line break up, and the field says as much
 
@@ -63,7 +63,7 @@ A wrong password is a glitch with a reason: the plate and the line break up, and
 
 The box is a static image and the text is two labels on top of it. The engine renders a frame and writes it into `stateDir` — `frame` for the line, `name` for the plate — and the labels in the config are `cmd[update:100] cat` on exactly those two files, so hyprlock picks the frame up on its own poll. It is a rewrite each way rather than a signal because hyprlock's `SIGUSR2` handler walks its timer vector without the mutex and allocates inside the handler, so pushing into a busy locker wedges it ([hyprwm/hyprlock#539](https://github.com/hyprwm/hyprlock/pull/539))
 
-Typing is the Ren'Py trick: every frame renders the _whole_ line and hides the part not yet typed in a transparent span. That is only half of standing still, though — a hyprlock label has no width and no corner to anchor to, it is placed by its own texture. So the frame is padded on every side that could move: blank lines up to the height of the text area, and a closing line of spaces wider than any line will be. With the texture size constant, `halign = center` plus `valign = bottom` pin the top-left corner of the text at the box's padding, and the line grows to the right instead of creeping out from the middle. All of it needs `text_trim = false`, which is why the config sets it
+Typing is the Ren'Py trick: every frame renders the *whole* line and hides the part not yet typed in a transparent span. That is only half of standing still, though — a hyprlock label has no width and no corner to anchor to, it is placed by its own texture. So the frame is padded on every side that could move: blank lines up to the height of the text area, and a closing line of spaces wider than any line will be. With the texture size constant, `halign = center` plus `valign = bottom` pin the top-left corner of the text at the box's padding, and the line grows to the right instead of creeping out from the middle. All of it needs `text_trim = false`, which is why the config sets it
 
 Geometry is computed in [`nix/config.nix`](nix/config.nix) from the dialog box's own 1280x720 canvas, and the width it gives the text area is handed to the engine — the wrap has to be the same number the labels were laid out at. A replacement `dialogImage` has to keep that canvas
 
