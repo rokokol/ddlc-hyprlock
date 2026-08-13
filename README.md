@@ -51,7 +51,7 @@ The line types out a character at a time, wraps inside the box when it is too lo
 
 ![The dialog box typing a line, wrapping the next one and garbling in between](docs/dialog.gif)
 
-*[the full recording](docs/demo.mp4) — forty seconds of her talking*
+_[the full recording](docs/demo.mp4)_
 
 A wrong password is a glitch with a reason: the plate and the line break up, and the field says as much
 
@@ -63,7 +63,7 @@ A wrong password is a glitch with a reason: the plate and the line break up, and
 
 The box is a static image and the text is two labels on top of it. The engine renders a frame and writes it into `stateDir` — `frame` for the line, `name` for the plate — and the labels in the config are `cmd[update:100] cat` on exactly those two files, so hyprlock picks the frame up on its own poll. It is a rewrite each way rather than a signal because hyprlock's `SIGUSR2` handler walks its timer vector without the mutex and allocates inside the handler, so pushing into a busy locker wedges it ([hyprwm/hyprlock#539](https://github.com/hyprwm/hyprlock/pull/539))
 
-Typing is the Ren'Py trick: every frame renders the *whole* line and hides the part not yet typed in a transparent span. That is only half of standing still, though — a hyprlock label has no width and no corner to anchor to, it is placed by its own texture. So the frame is padded on every side that could move: blank lines up to the height of the text area, and a closing line of spaces wider than any line will be. With the texture size constant, `halign = center` plus `valign = bottom` pin the top-left corner of the text at the box's padding, and the line grows to the right instead of creeping out from the middle. All of it needs `text_trim = false`, which is why the config sets it
+Typing is the Ren'Py trick: every frame renders the _whole_ line and hides the part not yet typed in a transparent span. That is only half of standing still, though — a hyprlock label has no width and no corner to anchor to, it is placed by its own texture. So the frame is padded on every side that could move: blank lines up to the height of the text area, and a closing line of spaces wider than any line will be. With the texture size constant, `halign = center` plus `valign = bottom` pin the top-left corner of the text at the box's padding, and the line grows to the right instead of creeping out from the middle. All of it needs `text_trim = false`, which is why the config sets it
 
 Geometry is computed in [`nix/config.nix`](nix/config.nix) from the dialog box's own 1280x720 canvas, and the width it gives the text area is handed to the engine — the wrap has to be the same number the labels were laid out at. A replacement `dialogImage` has to keep that canvas
 
@@ -73,11 +73,11 @@ One mechanism for two triggers: a wrong password, and a Poisson stream of sponta
 
 The flash is the compositor's job, not hyprlock's, and `flash` picks who does it:
 
-| `flash` | | |
-| --- | --- | --- |
-| `hyprctl` | sets the shipped [`shaders/glitch.frag`](shaders/glitch.frag) in `decoration:screen_shader`, and empties that option when the flash is over | needs nothing but Hyprland. It empties the option rather than putting back what was in it, so a screen shader of your own does not survive the first glitch |
-| `screen-shader` | hands the flash to [screen-shader](https://github.com/rokokol/hyprland-screen-shader), which composites it over the effect already on screen and puts that back | set `screenShader` to the package, which selects this mode by itself |
-| `none` | nothing, the glitch stays text-only | |
+| `flash`         | what it does                                                                                                                                                    | what to know                                                                                                                                                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hyprctl`       | sets the shipped [`shaders/glitch.frag`](shaders/glitch.frag) in `decoration:screen_shader`, and empties that option when the flash is over                     | needs nothing but Hyprland. It empties the option rather than putting back what was in it, so a screen shader of your own does not survive the first glitch |
+| `screen-shader` | hands the flash to [screen-shader](https://github.com/rokokol/hyprland-screen-shader), which composites it over the effect already on screen and puts that back | set `screenShader` to the package, which selects this mode by itself                                                                                        |
+| `none`          | nothing, the glitch stays text-only                                                                                                                             |                                                                                                                                                             |
 
 Either way the clearing is on the engine's own clock, in the same loop that renders frames — no background sleeper that could outlive the lock, and a lock killed mid-flash still takes the shader down with it
 
@@ -107,25 +107,25 @@ Two things in a line are substituted, both of them things she says about the mac
 
 That enables `programs.hyprlock`, writes the whole config, and installs the dialog engine. It starts nothing — see [running a lock](#running-a-lock)
 
-| option | | default |
-| --- | --- | --- |
-| `dialog` | the box, the typed quotes and the name plate. Off leaves the background, clock, date, layout and input field | `true` |
-| `glitch` | garble the dialog on a wrong password and at random intervals | follows `dialog` |
-| `flash` | how the whole screen flashes on a glitch: `hyprctl`, `screen-shader` or `none` | `screen-shader` when `screenShader` is set, else `hyprctl` |
-| `screenShader` | the [screen-shader](https://github.com/rokokol/hyprland-screen-shader) package, for that mode | `null` |
-| `glitchShader` | the shader `hyprctl` mode sets — a complete Hyprland screen shader, not an effect body | [`shaders/glitch.frag`](shaders/glitch.frag) |
-| `name` | the name on the plate | `Monika` |
-| `characterDir` | what `[chr]` in a line becomes | the directory `quotesFile` is in |
-| `font` | the font every label and the input field are set in | `Doki` |
-| `background` | the wallpaper behind the lock | `assets/just-monika.png` |
-| `dialogImage` | the dialog box the text sits in | `assets/dialog-box.png` |
-| `quotesFile` | what she talks about | `assets/monika-talk.txt`, her Act 3 dialogue |
-| `reentryFile` | the topics a lock opens with | `assets/monika-reentry.txt` |
-| `placeholderText` | what the empty password field says | `<i>Give me it...~</i>` |
-| `failText` | what a wrong password says | `This isn't it... ($ATTEMPTS)` |
-| `stateDir` | the directory the rendered frame is handed over in: the engine writes `frame` and `name` there, the labels `cat` them | `${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc` |
-| `pollMs` | how often hyprlock re-reads that frame, ms. Also the engine's frame rate and one character of typing, and every tick costs a shell — a floor, not a knob | `100` |
-| `lockCommand` | read-only, and the one thing you have to consume: the exact command that takes a lock | the engine, or plain hyprlock without `dialog` |
+| option            | what it does                                                                                                                                             | default                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `dialog`          | the box, the typed quotes and the name plate. Off leaves the background, clock, date, layout and input field                                             | `true`                                                     |
+| `glitch`          | garble the dialog on a wrong password and at random intervals                                                                                            | follows `dialog`                                           |
+| `flash`           | how the whole screen flashes on a glitch: `hyprctl`, `screen-shader` or `none`                                                                           | `screen-shader` when `screenShader` is set, else `hyprctl` |
+| `screenShader`    | the [screen-shader](https://github.com/rokokol/hyprland-screen-shader) package, for that mode                                                            | `null`                                                     |
+| `glitchShader`    | the shader `hyprctl` mode sets — a complete Hyprland screen shader, not an effect body                                                                   | [`shaders/glitch.frag`](shaders/glitch.frag)               |
+| `name`            | the name on the plate                                                                                                                                    | `Monika`                                                   |
+| `characterDir`    | what `[chr]` in a line becomes                                                                                                                           | the directory `quotesFile` is in                           |
+| `font`            | the font every label and the input field are set in                                                                                                      | `Doki`                                                     |
+| `background`      | the wallpaper behind the lock                                                                                                                            | `assets/just-monika.png`                                   |
+| `dialogImage`     | the dialog box the text sits in                                                                                                                          | `assets/dialog-box.png`                                    |
+| `quotesFile`      | what she talks about                                                                                                                                     | `assets/monika-talk.txt`, her Act 3 dialogue               |
+| `reentryFile`     | the topics a lock opens with                                                                                                                             | `assets/monika-reentry.txt`                                |
+| `placeholderText` | what the empty password field says                                                                                                                       | `<i>Give me it...~</i>`                                    |
+| `failText`        | what a wrong password says                                                                                                                               | `This isn't it... ($ATTEMPTS)`                             |
+| `stateDir`        | the directory the rendered frame is handed over in: the engine writes `frame` and `name` there, the labels `cat` them                                    | `${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc`                       |
+| `pollMs`          | how often hyprlock re-reads that frame, ms. Also the engine's frame rate and one character of typing, and every tick costs a shell — a floor, not a knob | `100`                                                      |
+| `lockCommand`     | read-only, and the one thing you have to consume: the exact command that takes a lock                                                                    | the engine, or plain hyprlock without `dialog`             |
 
 ### Any other distribution
 
