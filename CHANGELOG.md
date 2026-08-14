@@ -4,6 +4,8 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-08-14
+
 ### Added
 
 - `glsl` check: every shader is compiled by glslang in `nix flake check`, because Hyprland announces one it refuses on its on-screen error bar and in no log a script can read
