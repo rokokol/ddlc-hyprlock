@@ -127,10 +127,19 @@
           # announced on Hyprland's on-screen error bar and nowhere a script can read it —
           # measured on 0.56.1: nothing in hyprland.log, nothing in `hyprctl configerrors`,
           # and hyprctl still exits 0. So the compile happens here, with the same GLSL front end
-          glsl = pkgs.runCommand "glsl" { nativeBuildInputs = [ pkgs.glslang ]; } ''
-            for frag in ${shadersDir}/*.frag; do
+          shaders-compile = pkgs.runCommand "shaders-compile" { nativeBuildInputs = [ pkgs.glslang ]; } ''
+            # nullglob is on in a builder, so an empty glob would run the loop zero times
+            # and pass — the count is what keeps this check able to fail
+            shaders=(${shadersDir}/*.frag)
+            if (( ''${#shaders[@]} != 1 )); then
+              echo "expected one shader, found ''${#shaders[@]}: ''${shaders[*]}"
+              exit 1
+            fi
+            for frag in "''${shaders[@]}"; do
               echo "compiling $(basename "$frag")"
-              glslangValidator "$frag"
+              # -S frag rather than trusting the suffix: without it a renamed file makes
+              # glslangValidator print its usage instead of judging the shader
+              glslangValidator -S frag "$frag"
             done
             touch $out
           '';

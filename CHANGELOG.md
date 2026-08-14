@@ -8,7 +8,7 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ### Added
 
-- `glsl` check: every shader is compiled by glslang in `nix flake check`, because Hyprland announces one it refuses on its on-screen error bar and in no log a script can read
+- `shaders-compile` check: every shader is compiled by glslang in `nix flake check`, because Hyprland announces one it refuses on its on-screen error bar and in no log a script can read. It counts the shaders first — `nullglob` is on in a builder, so an empty glob would pass a loop that never ran
 - `tests/live.sh` runs the flash against the real compositor and checks that `debug:damage_tracking` and `debug:vfr` come back at the values the session had
 
 ### Fixed
