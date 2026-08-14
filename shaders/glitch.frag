@@ -1,10 +1,13 @@
+#version 300 es
 // Jittering RGB split with occasional row shifts — what the screen does when she glitches
 //
 // A complete Hyprland screen shader, not a body: decoration:screen_shader is handed this file
 // as is. Same effect as the one in rokokol/hyprland-screen-shader, kept here so that flashing
 // the screen needs no dependency — that repository is the one that can compose effects and
 // restore what was on the screen before, this file is the standalone version of one of them
-#version 300 es
+//
+// #version stays on line 1 even though Hyprland tolerates a comment above it: an ES shader
+// is only valid with it first, and that is what lets the suite compile this file with glslang
 precision highp float;
 
 in vec2 v_texcoord;

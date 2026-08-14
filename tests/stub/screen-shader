@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
-# Records the flash instead of compositing one, so a glitch can be observed without a session
-printf '%s\n' "$*" >>"${STUB_SHADER_LOG:?}"
+# Records the flash instead of compositing one, so a glitch can be observed without a session.
+# Arguments joined by a pipe, as in the hyprctl stub: the log is about the call, boundaries included
+(
+  IFS='|'
+  printf '%s\n' "$*"
+) >>"${STUB_SHADER_LOG:?}"

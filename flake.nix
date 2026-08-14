@@ -36,6 +36,10 @@
         name = "ddlc-hyprlock-dist";
         path = ./dist;
       };
+      shadersDir = builtins.path {
+        name = "ddlc-hyprlock-shaders";
+        path = ./shaders;
+      };
       installer = builtins.path {
         name = "install.sh";
         path = ./install.sh;
@@ -116,6 +120,18 @@
           # what the package would have written
           dist-is-current = pkgs.runCommand "dist-is-current" { } ''
             diff -r ${distDir} ${self.packages.${pkgs.stdenv.hostPlatform.system}.dist}
+            touch $out
+          '';
+
+          # The flash is a shader the compositor has to compile, and a shader it refuses is
+          # announced on Hyprland's on-screen error bar and nowhere a script can read it —
+          # measured on 0.56.1: nothing in hyprland.log, nothing in `hyprctl configerrors`,
+          # and hyprctl still exits 0. So the compile happens here, with the same GLSL front end
+          glsl = pkgs.runCommand "glsl" { nativeBuildInputs = [ pkgs.glslang ]; } ''
+            for frag in ${shadersDir}/*.frag; do
+              echo "compiling $(basename "$frag")"
+              glslangValidator "$frag"
+            done
             touch $out
           '';
 

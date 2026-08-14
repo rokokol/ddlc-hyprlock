@@ -59,6 +59,11 @@ for stub in "$HERE"/stub/*; do
   fi
 done
 
+# Which engine is under test: the default is whatever PATH resolves, and that is the freshly
+# built package inside the check but just as easily the installed one on a developer's machine
+# — where an edit in the checkout would be tested by nothing at all
+printf 'engine: %s\n' "$(command -v "$ENGINE")"
+
 fails=0
 
 ok() { printf '  ✓ %s\n' "$1"; }
@@ -193,7 +198,7 @@ export DDLC_HYPRLOCK_GLITCH=1
 export DDLC_HYPRLOCK_FLASH=screen-shader
 say 'Hi, [player]! & <3'
 lock
-logged "$SHADER_LOG" "flash glitch" || fail "the journal line did not reach screen-shader"
+logged "$SHADER_LOG" "flash|glitch" || fail "the journal line did not reach screen-shader"
 # The flash and the garbled text are not the same instant: the shader is set as the journal
 # line arrives, the text garbles on the loop's next render. So wait for it rather than read
 # once — it stays garbled for GLITCH_TEXT_MS, which is seconds, and the poll costs nothing
@@ -206,7 +211,7 @@ for _ in $(seq 40); do
 done
 stop
 
-if grep -q '^flash glitch' "$SHADER_LOG"; then
+if grep -q '^flash|glitch|' "$SHADER_LOG"; then
   ok "a wrong password flashes the screen through screen-shader"
 else
   fail "screen-shader was called as: $(cat "$SHADER_LOG")"
@@ -264,6 +269,20 @@ if grep -qF "decoration:screen_shader [[EMPTY]]" "$HYPRCTL_LOG"; then
   ok "a lock that dies mid-flash still clears the shader"
 else
   fail "the shader outlived the engine: $(cat "$HYPRCTL_LOG")"
+fi
+
+# hyprctl fails when there is no compositor to talk to — a keyword it dislikes it reports on
+# stdout and still exits 0, so this is the only way the call can actually come back non-zero.
+# Nothing was set, so nothing may be cleared afterwards: an [[EMPTY]] here would be the engine
+# blanking a shader slot it never touched, and on a session that has one of its own that shows
+: >"$HYPRCTL_LOG"
+STUB_HYPRCTL_RC=1 lock
+logged "$HYPRCTL_LOG" "glitch.frag" || fail "the shader was never even attempted"
+stop
+if grep -qF "decoration:screen_shader [[EMPTY]]" "$HYPRCTL_LOG"; then
+  fail "a flash that hyprctl refused was cleared anyway: $(cat "$HYPRCTL_LOG")"
+else
+  ok "a refused flash is not cleared afterwards"
 fi
 
 echo "no flash at all"

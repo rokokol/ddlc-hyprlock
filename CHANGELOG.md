@@ -4,6 +4,20 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+### Added
+
+- `glsl` check: every shader is compiled by glslang in `nix flake check`, because Hyprland announces one it refuses on its on-screen error bar and in no log a script can read
+- `tests/live.sh` runs the flash against the real compositor and checks that `debug:damage_tracking` and `debug:vfr` come back at the values the session had
+
+### Fixed
+
+- `glitch.frag` starts with `#version`, which an ES shader is only valid with — Hyprland tolerated the comment above it, standard GLSL does not
+
+### Changed
+
+- the `hyprctl` and `screen-shader` stubs separate their logged arguments with a pipe, so a `--batch` split across several arguments no longer reads like one
+- the suite prints which engine it is driving: the default is whatever `ddlc-hyprlock` PATH resolves to, and on a developer's machine that is the installed package rather than the checkout
+
 ## [1.0.0] - 2026-08-13
 
 Split out of [rokokol/huix](https://github.com/rokokol/huix), where the config and the dialog engine sat in the Hyprland directory

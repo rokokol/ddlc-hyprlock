@@ -2,7 +2,13 @@
 # Records what the engine would have told Hyprland, so the flash can be observed without a
 # compositor. getoption is answered the way the real one answers for an unset int option, and
 # in Hyprland's own defaults — the flash reads them to know what to put back
-printf '%s\n' "$*" >>"${STUB_HYPRCTL_LOG:?}"
+#
+# Arguments joined by a pipe, not by a space: a --batch is one argument holding semicolons and
+# spaces, and a log that joined on spaces could not tell it from a batch split across several
+(
+  IFS='|'
+  printf '%s\n' "$*"
+) >>"${STUB_HYPRCTL_LOG:?}"
 
 if [[ "${1:-}" == "getoption" ]]; then
   case "${2:-}" in
@@ -13,4 +19,8 @@ if [[ "${1:-}" == "getoption" ]]; then
   exit 0
 fi
 
+# Exit 0 even for a keyword it does not like, because that is what the real one does: a bad
+# keyword is a line on stdout and nothing else. Only an unreachable compositor is an error,
+# and STUB_HYPRCTL_RC is how a case asks for one
 echo ok
+exit "${STUB_HYPRCTL_RC:-0}"
