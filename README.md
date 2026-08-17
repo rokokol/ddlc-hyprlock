@@ -137,6 +137,8 @@ sudo ./install.sh          # PREFIX=~/.local ./install.sh for a user install
 
 Nothing is built: [`dist/`](dist) is the rendered config, committed, and `install.sh` only substitutes where the assets landed. Then take it and run a lock through the engine:
 
+Package recipes can stage the same layout without leaking their build root into `hyprlock.conf`: `DESTDIR="$pkgdir" PREFIX=/usr ./install.sh`
+
 ```sh
 cp /usr/local/share/ddlc-hyprlock/hyprlock.conf ~/.config/hypr/hyprlock.conf
 ddlc-hyprlock lock

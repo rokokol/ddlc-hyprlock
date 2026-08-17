@@ -4,6 +4,10 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+### Changed
+
+- `install.sh` accepts `DESTDIR` independently of `PREFIX` and keeps the staging root out of the rendered hyprlock config
+
 ## [1.0.1] - 2026-08-14
 
 ### Added

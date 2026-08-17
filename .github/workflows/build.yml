@@ -39,6 +39,14 @@ jobs:
             DDLC_HYPRLOCK_STATE_DIR=$PWD/state \
             out/bin/ddlc-hyprlock lock
           test -s "$PWD/state/frame"
+          DESTDIR=$PWD/stage PREFIX=/usr ./install.sh
+          grep -q '/usr/share/ddlc-hyprlock/just-monika.png' stage/usr/share/ddlc-hyprlock/hyprlock.conf
+          ! grep -q "$PWD/stage" stage/usr/share/ddlc-hyprlock/hyprlock.conf
+          DESTDIR=$PWD/stage-special PREFIX='/opt/a&b|c\d' ./install.sh
+          special_conf=(stage-special/opt/*/share/ddlc-hyprlock/hyprlock.conf)
+          test "${#special_conf[@]}" -eq 1
+          grep -qF '/opt/a&b|c\d/share/ddlc-hyprlock/just-monika.png' "${special_conf[0]}"
+          ! DESTDIR=$PWD/bad PREFIX=opt ./install.sh >/dev/null 2>&1
       - run: nix fmt -- --ci
 
   shell:
