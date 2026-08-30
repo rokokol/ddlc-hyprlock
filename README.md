@@ -39,7 +39,6 @@ nix build github:rokokol/ddlc-hyprlock && cat result/share/ddlc-hyprlock/hyprloc
 - [Running a lock](#running-a-lock)
 - [Tests](#tests)
 - [Layout](#layout)
-- [License](#license)
 
 ## UI
 
@@ -197,7 +196,3 @@ docs/                the screenshots and the recording the README shows
 tests/run.sh         the engine's suite, with stubs and goldens
 install.sh           for systems without Nix
 ```
-
-## License
-
-Doki Doki Literature Club is by [Team Salvato](https://teamsalvato.com/). This is non-commercial fan content, and what every bundled file is comes from [ASSETS.md](ASSETS.md). The code is MIT
