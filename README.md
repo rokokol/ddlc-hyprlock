@@ -15,9 +15,6 @@
 
 Every colour is a measured one out of [ddlc-palette](https://github.com/rokokol/ddlc-palette), which reads them off [ddlc.moe](https://ddlc.moe) — nothing here is eyeballed
 
-> [!NOTE]
-> Unaffiliated with and not endorsed by Team Salvato. The dialog box, the background and every line she says are theirs — see [ASSETS.md](ASSETS.md)
-
 Came over from my rice, **[rokokol/huix](https://github.com/rokokol/huix)**
 
 ```sh
