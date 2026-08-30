@@ -56,5 +56,5 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
       - uses: cachix/install-nix-action@v31
-      - run: nix run nixpkgs#shellcheck -- install.sh ddlc-hyprlock.sh tests/run.sh tests/live.sh
-      - run: nix run nixpkgs#shfmt -- -d -i 2 -ci install.sh ddlc-hyprlock.sh tests/run.sh tests/live.sh
+      - run: nix develop --no-write-lock-file --command shellcheck install.sh ddlc-hyprlock.sh tests/run.sh tests/live.sh
+      - run: nix develop --no-write-lock-file --command shfmt -d -i 2 -ci install.sh ddlc-hyprlock.sh tests/run.sh tests/live.sh
