@@ -14,6 +14,7 @@ nix flake check          # tests, dist/ current, conf shape, module wiring, shel
 ./tests/run.sh           # the engine against stubs; --update rewrites the goldens
 ./tests/live.sh          # the rendered config through the real hyprlock, without locking
 PREFIX=$PWD/out ./install.sh
+./tests/distro.sh debian # real root install in docker; also ubuntu, arch, fedora
 nix fmt -- --ci
 ```
 
@@ -24,10 +25,12 @@ nix/config.nix       the whole lock screen as data: geometry, colours, labels
 nix/render.nix       that attrset -> hyprlock.conf, for the consumers Home Manager cannot serve
 nix/                 package.nix, module.nix, module-test.nix
 ddlc-hyprlock.sh     the dialog engine
+VERSION              the one place the version lives — package.nix, --version and CI read it
 assets/              the background, the dialog box, and what she says
 shaders/glitch.frag  the flash, for the mode that needs no dependency
+completions/         install.sh's own completions, spelled by hand
 dist/                the rendered config, committed for consumers without Nix
-tests/               run.sh, live.sh, the stubs and the goldens
+tests/               run.sh, live.sh, distro.sh, check-completions.sh, stubs, goldens
 install.sh           for systems without Nix
 ```
 

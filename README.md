@@ -10,6 +10,10 @@
 [![assets](https://img.shields.io/badge/assets-Team_Salvato-FF80C0?style=flat)](ASSETS.md)
 [![license](https://img.shields.io/badge/code-MIT-3DA639?style=flat)](LICENSE)
 [![build](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/build.yml/badge.svg)](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/build.yml)
+[![debian](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-debian.yml/badge.svg)](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-debian.yml)
+[![ubuntu](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-ubuntu.yml/badge.svg)](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-ubuntu.yml)
+[![arch](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-arch.yml/badge.svg)](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-arch.yml)
+[![fedora](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-fedora.yml/badge.svg)](https://github.com/rokokol/ddlc-hyprlock/actions/workflows/distro-fedora.yml)
 
 </div>
 
@@ -140,7 +144,7 @@ cp /usr/local/share/ddlc-hyprlock/hyprlock.conf ~/.config/hypr/hyprlock.conf
 ddlc-hyprlock lock
 ```
 
-The engine finds the assets, the quotes and the shader from its own location, so nothing has to be set. Everything it does read is documented in `ddlc-hyprlock help`
+The engine lives beside its assets in `share/ddlc-hyprlock` with a symlink in `bin`, and finds the assets, the quotes and the shader from its own location, so nothing has to be set. Everything it does read is documented in `ddlc-hyprlock help`. Every file the install writes lands in an install manifest, and `./install.sh --uninstall` consumes it. A failed preflight names what is missing and prints your distribution's own install command as a runnable `$` line — nothing is installed on your behalf; `hyprlock`, `hyprctl` and `journalctl` only warn, because they come from the session. Tab completion for the installer is in the checkout: `source completions/install.sh.bash` (or `.zsh`)
 
 > [!NOTE]
 > bash 5.2 or newer. The frame is rendered in pure bash — no fork per character — and both `EPOCHREALTIME` and the pango escaping depend on that version
@@ -171,6 +175,8 @@ bind = SUPER, F12, exec, loginctl lock-session
 tests/run.sh            # the engine, against a stub locker, journal, hyprctl and screen-shader
 tests/run.sh --update   # rewrite the goldens
 tests/live.sh           # the rendered config through the real hyprlock, without locking
+tests/distro.sh debian  # real root install in a docker container: preflight → its own
+                        # printed guidance → install → suite → uninstall; also ubuntu, arch, fedora
 ```
 
 The suite drives the packaged command rather than the script, since the wrapper's defaults are half of what there is to get wrong, and it isolates `HOME`, `XDG_RUNTIME_DIR` and `XDG_DATA_HOME` — a session exports the last two, and the engine would otherwise publish frames into the live lock's state directory. It also refuses to run unless every stub is executable and first on `PATH`: a stub that is neither hands the test the real tool, and for `hyprctl` that means a live compositor instead of a log file

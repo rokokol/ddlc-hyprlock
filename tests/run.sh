@@ -310,6 +310,14 @@ else
   fail "the engine exited $rc after the locker was done"
 fi
 
+say "the engine answers with the VERSION file's number"
+want="ddlc-hyprlock $(cat "$HERE/../VERSION")"
+if [[ "$("$ENGINE" --version)" == "$want" && "$("$ENGINE" -v)" == "$want" ]]; then
+  ok "--version and -v both answer $want"
+else
+  fail "--version does not match VERSION: $("$ENGINE" --version)"
+fi
+
 if ((fails)); then
   printf '\n%d failed\n' "$fails"
   exit 1

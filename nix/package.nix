@@ -51,6 +51,7 @@ let
     };
 
   engine = file "ddlc-hyprlock.sh" ../ddlc-hyprlock.sh;
+  versionFile = file "ddlc-hyprlock-VERSION" ../VERSION;
   assets = {
     "just-monika.png" = file "just-monika.png" ../assets/just-monika.png;
     "dialog-box.png" = file "dialog-box.png" ../assets/dialog-box.png;
@@ -110,7 +111,8 @@ in
 
 stdenvNoCC.mkDerivation {
   pname = "ddlc-hyprlock";
-  version = "1.0";
+  # VERSION is the one place the number lives; CI holds CHANGELOG.md to it
+  version = lib.fileContents ../VERSION;
 
   dontUnpack = true;
   nativeBuildInputs = [ makeWrapper ];
@@ -125,6 +127,9 @@ stdenvNoCC.mkDerivation {
     )}
 
     substitute ${conf} ${share}/hyprlock.conf --subst-var-by share ${share}
+
+    # --version finds this beside the assets, one prefix over from the wrapped engine
+    install -Dm644 ${versionFile} ${share}/VERSION
 
     install -Dm755 ${engine} $out/bin/ddlc-hyprlock
     patchShebangs $out/bin

@@ -44,6 +44,14 @@
         name = "install.sh";
         path = ./install.sh;
       };
+      completionsDir = builtins.path {
+        name = "ddlc-hyprlock-completions";
+        path = ./completions;
+      };
+      versionFile = builtins.path {
+        name = "ddlc-hyprlock-VERSION";
+        path = ./VERSION;
+      };
 
       render = import ./nix/render.nix { inherit lib; };
 
@@ -110,6 +118,7 @@
               }
               ''
                 cp -r ${testsDir}/. tests
+                cp ${versionFile} VERSION
                 chmod -R +w tests
                 patchShebangs tests
                 bash tests/run.sh
@@ -231,14 +240,24 @@
                 nativeBuildInputs = [
                   pkgs.shellcheck
                   pkgs.shfmt
+                  pkgs.zsh
                 ];
               }
               ''
-                files="${engine} ${testsDir}/run.sh ${testsDir}/live.sh ${installer}"
+                files="${engine} ${testsDir}/run.sh ${testsDir}/live.sh ${testsDir}/distro.sh ${testsDir}/check-completions.sh ${installer} ${completionsDir}/install.sh.bash"
                 # shellcheck disable=SC2086
                 shellcheck $files
                 # shellcheck disable=SC2086
                 shfmt -d -i 2 -ci $files
+                # zsh is not shellcheck's language; a parse is what can be checked
+                zsh -n ${completionsDir}/install.sh.zsh
+
+                # install.sh and its completions must not drift apart
+                mkdir -p repo/tests
+                cp ${installer} repo/install.sh
+                cp -r ${completionsDir} repo/completions
+                cp ${testsDir}/check-completions.sh repo/tests/
+                bash repo/tests/check-completions.sh
                 touch $out
               '';
         }

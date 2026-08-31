@@ -11,6 +11,7 @@ Modes:
          This is what an idle daemon's lock command should be, so that every
          lock path funnels through it
   help   this help
+  -v, --version   print the version
 
 The dialog labels just `cat` the files this loop writes, on hyprlock's own poll.
 Never signal hyprlock: its SIGUSR2 handler walks the timer vector without the
@@ -74,9 +75,15 @@ by definition a fresh lock and starts the dialog from the re-entry line
 EOF
 }
 
-# Where the assets sit relative to bin/, so an install without Nix needs no settings
+# Where the assets sit, so an install without Nix needs no settings. A copy in bin/
+# (the Nix package wraps one there) looks a prefix over; the symlinked install resolves
+# straight into share, where the assets sit beside this script
 HERE="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")" && pwd)"
-SHARE="$HERE/../share/ddlc-hyprlock"
+if [[ -f "$HERE/monika-talk.txt" ]]; then
+  SHARE="$HERE"
+else
+  SHARE="$HERE/../share/ddlc-hyprlock"
+fi
 
 QUOTES="${DDLC_HYPRLOCK_QUOTES:-$SHARE/monika-talk.txt}"
 REENTRY="${DDLC_HYPRLOCK_REENTRY:-$SHARE/monika-reentry.txt}"
@@ -519,6 +526,16 @@ cmd_lock() {
 case "${1:-lock}" in
   lock) cmd_lock ;;
   help | -h | --help) usage ;;
+  # VERSION sits beside the assets (share, or the repo root in a checkout)
+  -v | --version)
+    for v in "$SHARE/VERSION" "$HERE/VERSION"; do
+      if [[ -f "$v" ]]; then
+        echo "ddlc-hyprlock $(cat "$v")"
+        exit 0
+      fi
+    done
+    echo "ddlc-hyprlock unknown"
+    ;;
   *)
     usage >&2
     exit 1

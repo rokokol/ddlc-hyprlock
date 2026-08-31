@@ -22,6 +22,13 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
       - uses: cachix/install-nix-action@v31
+      - name: VERSION matches CHANGELOG
+        run: |
+          ver=$(cat VERSION)
+          grep -qF "## [$ver]" CHANGELOG.md || {
+            echo "VERSION says $ver but CHANGELOG.md has no ## [$ver] heading" >&2
+            exit 1
+          }
       - run: nix build --no-write-lock-file .#ddlc-hyprlock
       # tests, dist-is-current, conf-shape, module-wiring, scripts-lint
       - run: nix flake check --no-write-lock-file
@@ -31,7 +38,11 @@ jobs:
         run: |
           PREFIX=$PWD/out ./install.sh
           test -f out/share/ddlc-hyprlock/hyprlock.conf
-          ! grep -q '@share@' out/share/ddlc-hyprlock/hyprlock.conf
+          test -f out/share/ddlc-hyprlock/glitch.frag
+          test -f out/share/ddlc-hyprlock/install-manifest
+          test -L out/bin/ddlc-hyprlock
+          out/bin/ddlc-hyprlock --version | grep -xF "ddlc-hyprlock $(cat VERSION)"
+          if grep -q '@share@' out/share/ddlc-hyprlock/hyprlock.conf; then exit 1; fi
           grep -q "$PWD/out/share/ddlc-hyprlock/just-monika.png" out/share/ddlc-hyprlock/hyprlock.conf
           DDLC_HYPRLOCK_HYPRLOCK=$PWD/tests/stub/hyprlock \
             STUB_HYPRLOCK_SLEEP=3 \
@@ -39,9 +50,15 @@ jobs:
             DDLC_HYPRLOCK_STATE_DIR=$PWD/state \
             out/bin/ddlc-hyprlock lock
           test -s "$PWD/state/frame"
+          # Uninstall consumes the manifest and leaves nothing of ours behind
+          PREFIX=$PWD/out ./install.sh --uninstall
+          test ! -e out/bin/ddlc-hyprlock
+          test ! -e out/share/ddlc-hyprlock
           DESTDIR=$PWD/stage PREFIX=/usr ./install.sh
           grep -q '/usr/share/ddlc-hyprlock/just-monika.png' stage/usr/share/ddlc-hyprlock/hyprlock.conf
-          ! grep -q "$PWD/stage" stage/usr/share/ddlc-hyprlock/hyprlock.conf
+          if grep -q "$PWD/stage" stage/usr/share/ddlc-hyprlock/hyprlock.conf; then exit 1; fi
+          DESTDIR=$PWD/stage PREFIX=/usr ./install.sh --uninstall
+          test ! -e stage/usr/share/ddlc-hyprlock
           DESTDIR=$PWD/stage-special PREFIX='/opt/a&b|c\d' ./install.sh
           special_conf=(stage-special/opt/*/share/ddlc-hyprlock/hyprlock.conf)
           test "${#special_conf[@]}" -eq 1
@@ -49,6 +66,8 @@ jobs:
           ! DESTDIR=$PWD/bad PREFIX=opt ./install.sh >/dev/null 2>&1
       - run: nix fmt -- --ci
 
+  # The one file list lives in the flake's scripts-lint check — this job is a fast,
+  # separately-named status for it, not a second copy of the commands
   shell:
     runs-on: ubuntu-latest
     steps:
@@ -56,5 +75,4 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
       - uses: cachix/install-nix-action@v31
-      - run: nix develop --no-write-lock-file --command shellcheck install.sh ddlc-hyprlock.sh tests/run.sh tests/live.sh
-      - run: nix develop --no-write-lock-file --command shfmt -d -i 2 -ci install.sh ddlc-hyprlock.sh tests/run.sh tests/live.sh
+      - run: nix build --no-write-lock-file .#checks.x86_64-linux.scripts-lint
