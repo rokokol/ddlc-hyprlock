@@ -29,8 +29,10 @@ VERSION              the one place the version lives — package.nix, --version 
 assets/              the background, the dialog box, and what she says
 shaders/glitch.frag  the flash, for the mode that needs no dependency
 completions/         install.sh's own completions, spelled by hand
+check-sh.sh          vendored from bash-best-practices, holds install.sh's help
+                     and completions to its parser
 dist/                the rendered config, committed for consumers without Nix
-tests/               run.sh, live.sh, distro.sh, check-completions.sh, stubs, goldens
+tests/               run.sh, live.sh, distro.sh, stubs, goldens
 install.sh           for systems without Nix
 ```
 
