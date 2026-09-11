@@ -20,6 +20,10 @@ _install_sh_ddlc_hyprlock() {
       return
       ;;
   esac
-  mapfile -t COMPREPLY < <(compgen -W "${flags[*]}" -- "$cur")
+  COMPREPLY=()
+  local word
+  while IFS= read -r word; do
+    [[ -n "$word" ]] && COMPREPLY+=("$word")
+  done < <(compgen -W "${flags[*]}" -- "$cur")
 }
 complete -F _install_sh_ddlc_hyprlock install.sh ./install.sh
