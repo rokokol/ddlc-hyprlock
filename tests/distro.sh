@@ -122,13 +122,15 @@ bin_path="$prefix/bin/ddlc-hyprlock"
 share_dir="$prefix/share/ddlc-hyprlock"
 
 say "a relative PREFIX is rejected"
-! PREFIX=usr ./install.sh "${INSTALL_FLAGS[@]}" >/dev/null 2>&1 ||
-  die "install.sh accepted a relative PREFIX"
+rc=0
+PREFIX=usr ./install.sh "${INSTALL_FLAGS[@]}" >/dev/null 2>&1 || rc=$?
+((rc == 2)) || die "a relative PREFIX answered $rc, not the usage-error code 2"
 
 say "install, running the printed guidance when the preflight refuses"
 rc=0
 out=$(./install.sh "${INSTALL_FLAGS[@]}" 2>&1) || rc=$?
 if ((rc != 0)); then
+  ((rc == 1)) || die "the preflight refusal answered $rc, not 1"
   # The refusal must be complete and clean: name what is missing, write nothing
   printf '%s\n' "$out" | grep -q 'missing dependencies' ||
     die "the refusal did not say what is missing: $out"

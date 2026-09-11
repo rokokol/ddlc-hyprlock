@@ -4,6 +4,10 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ## [Unreleased]
 
+### Changed
+
+- `install.sh` exits 2 on a usage error — an unknown flag, `--prefix`/`--destdir` missing their argument, a relative `--prefix` — rather than 1, matching the family's convention that 1 means a dependency was missing rather than a malformed request; `--help` ends with the sentence naming all three exit codes
+
 ## [1.1.0] - 2026-08-31
 
 ### Added
