@@ -9,10 +9,6 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 - the installer's completions are now drift-checked against `install.sh` by the vendored [bash-best-practices](https://github.com/rokokol/bash-best-practices-skill) `check-sh.sh -c`, which also holds `--help` itself to the flags and the exit codes, replacing `tests/check-completions.sh`
 - `install.sh` exits 2 on a usage error — an unknown flag, `--prefix`/`--destdir` missing their argument, a relative `--prefix` — rather than 1, matching the family's convention that 1 means a dependency was missing rather than a malformed request; `--help` ends with the sentence naming all three exit codes
 
-### Fixed
-
-- `completions/install.sh.bash` no longer uses `mapfile`, which the bash 3.2 a stock macOS ships does not have, so sourcing the completion there no longer fails with "mapfile: command not found"
-
 ## [1.1.0] - 2026-08-31
 
 ### Added
