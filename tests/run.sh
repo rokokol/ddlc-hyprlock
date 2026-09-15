@@ -2,14 +2,28 @@
 # Drives the engine against a stub locker and a stub journal, and diffs the frames it
 # publishes. HOME and XDG_RUNTIME_DIR are both redirected: a session exports the second one,
 # and the engine would otherwise publish straight into the live lock's state directory
-#
-#   tests/run.sh            check the engine
-#   tests/run.sh --update   rewrite the goldens from what it renders now
-#
-# DDLC_HYPRLOCK_BIN picks what is driven; by default the packaged command on PATH, so the
-# wrapper's own defaults are under test too
 
 set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+tests/run.sh — the fast suite for ddlc-hyprlock: drives the engine against a stub locker
+and a stub journal, and diffs the frames it publishes against tests/golden
+
+  tests/run.sh            check the engine
+  tests/run.sh --update   rewrite the goldens from what it renders now
+
+DDLC_HYPRLOCK_BIN picks what is driven; by default the packaged command on PATH, so the
+wrapper's own defaults are under test too
+
+Nothing here reaches the network
+Exit: 0 all passed, 1 a check failed
+EOF
+}
+[[ "${1:-}" == "-h" || "${1:-}" == "--help" || "${1:-}" == "help" ]] && {
+  usage
+  exit 0
+}
 
 HERE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 ENGINE="${DDLC_HYPRLOCK_BIN:-ddlc-hyprlock}"

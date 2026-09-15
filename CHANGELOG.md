@@ -8,6 +8,7 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 - the installer's completions are now drift-checked against `install.sh` by the vendored [bash-best-practices](https://github.com/rokokol/bash-best-practices-skill) `check-sh.sh -c`, which also holds `--help` itself to the flags and the exit codes, replacing `tests/check-completions.sh`
 - `install.sh` exits 2 on a usage error — an unknown flag, `--prefix`/`--destdir` missing their argument, a relative `--prefix` — rather than 1, matching the family's convention that 1 means a dependency was missing rather than a malformed request; `--help` ends with the sentence naming all three exit codes
+- `ddlc-hyprlock.sh`'s header comment keeps only the reason it never signals hyprlock; `--help` already carried everything a caller needs. `tests/run.sh -h|--help|help` now documents the suite: its modes, `DDLC_HYPRLOCK_BIN`, and that nothing in it reaches the network
 
 ## [1.1.0] - 2026-08-31
 

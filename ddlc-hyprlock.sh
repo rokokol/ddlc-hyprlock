@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Never signal hyprlock: its SIGUSR2 handler walks the timer vector without the
+# mutex and allocates inside the handler, so a push into a busy locker wedges it
 
 set -euo pipefail
 
@@ -13,9 +15,7 @@ Modes:
   help   this help
   -v, --version   print the version
 
-The dialog labels just `cat` the files this loop writes, on hyprlock's own poll.
-Never signal hyprlock: its SIGUSR2 handler walks the timer vector without the
-mutex and allocates inside the handler, so a push into a busy locker wedges it
+The dialog labels just `cat` the files this loop writes, on hyprlock's own poll
 
 The loop runs in the foreground with hyprlock as its child: no daemon to reap,
 and the lock command blocks for exactly the duration of the lock. It never kills
