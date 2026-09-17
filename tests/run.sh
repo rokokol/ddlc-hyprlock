@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Drives the engine against a stub locker and a stub journal, and diffs the frames it
-# publishes. HOME and XDG_RUNTIME_DIR are both redirected: a session exports the second one,
-# and the engine would otherwise publish straight into the live lock's state directory
+# HOME and XDG_RUNTIME_DIR are both redirected: a session exports the second one, and the
+# engine would otherwise publish straight into the live lock's state directory
 
 set -euo pipefail
 
