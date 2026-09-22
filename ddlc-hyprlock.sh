@@ -189,8 +189,8 @@ exp_ms() {
 
 # Pango entities. The quotes are load-bearing: since bash 5.2 a bare & in a replacement
 # stands for the text that matched, so &lt; would come out as <lt;. Quotes and not a
-# backslash, which tree-sitter's bash grammar refuses here; both spellings turn a&b<c>d
-# into a&amp;b&lt;c&gt;d
+# backslash, which tree-sitter's bash grammar refuses here. Bash 5 only: 3.2 keeps the
+# quotation marks, and this script runs under Hyprland
 esc() {
   local s=$1
   s=${s//"&"/"&amp;"}
