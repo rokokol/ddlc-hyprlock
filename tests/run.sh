@@ -264,8 +264,8 @@ else
   fail "the shader was left on: $(cat "$HYPRCTL_LOG")"
 fi
 
-# Those two are the compositor's settings, not ours: they go back to what they were, which the
-# stub reports as Hyprland's defaults
+# Those two are the compositor's settings, not the script's: they go back to what they were,
+# which the stub reports as Hyprland's defaults
 if grep -q "screen_shader \[\[EMPTY\]\] ; keyword debug:damage_tracking 2 ; keyword debug:vfr 1" "$HYPRCTL_LOG"; then
   ok "…and damage tracking and VFR are put back"
 else

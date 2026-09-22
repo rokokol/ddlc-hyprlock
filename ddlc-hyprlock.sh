@@ -187,13 +187,15 @@ exp_ms() {
     }')
 }
 
-# Pango entities. The backslashes are load-bearing: since bash 5.2 a bare & in a replacement
-# stands for the text that matched, so &lt; would come out as <lt;
+# Pango entities. The quotes are load-bearing: since bash 5.2 a bare & in a replacement
+# stands for the text that matched, so &lt; would come out as <lt;. Quotes and not a
+# backslash, which tree-sitter's bash grammar refuses here; both spellings turn a&b<c>d
+# into a&amp;b&lt;c&gt;d
 esc() {
   local s=$1
-  s=${s//&/\&amp;}
-  s=${s//</\&lt;}
-  s=${s//>/\&gt;}
+  s=${s//"&"/"&amp;"}
+  s=${s//"<"/"&lt;"}
+  s=${s//">"/"&gt;"}
   esc_v=$s
 }
 
@@ -298,7 +300,7 @@ flash_on() {
       # The shader is animated, and Hyprland refuses a `time` uniform while damage tracking is
       # on: it raises the error overlay and the effect never moves. So the two debug options go
       # first, in the same batch as the shader, and their old values are kept to be put back —
-      # unlike the shader slot, those two are not ours to redefine
+      # unlike the shader slot, those two belong to the session and not to this script
       hypr_get_int debug:damage_tracking && damage_prev=$get_v
       hypr_get_int debug:vfr && vfr_prev=$get_v
       # Armed before the call, not after: the EXIT trap clears the flash by this variable, and
@@ -503,8 +505,8 @@ cmd_lock() {
     # The flash is on a clock of its own: nothing else in the loop times it out
     ((shader_until_ms && now >= shader_until_ms)) && flash_off
 
-    # Spontaneous glitches: a Poisson stream. 0 means not scheduled yet, then we
-    # only assign the first interval, without firing
+    # Spontaneous glitches: a Poisson stream. 0 means not scheduled yet, and then the
+    # first interval is only assigned, without firing
     if ((GLITCH && now >= next_glitch_ms)); then
       ((next_glitch_ms > 0)) && fire_glitch
       exp_ms "$GLITCH_MEAN" "$GLITCH_MIN" "$GLITCH_MAX"
