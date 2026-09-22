@@ -109,7 +109,7 @@ in
 
   # Nothing to install and nothing to say when the flash needs no help
   flash = on.ddlc.hyprlock.flash;
-  warnings = on.warnings;
+  inherit (on) warnings;
   failedAssertions = map (a: a.message) (builtins.filter (a: !a.assertion) on.assertions);
   # Setting the package is what selects that mode, so it is not said twice
   shaderFlash = withShader.ddlc.hyprlock.flash;

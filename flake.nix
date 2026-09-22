@@ -16,7 +16,7 @@
       ddlc-palette,
     }:
     let
-      lib = nixpkgs.lib;
+      inherit (nixpkgs) lib;
       systems = [
         "x86_64-linux"
         "aarch64-linux"
@@ -140,26 +140,28 @@
           # announced on Hyprland's on-screen error bar and nowhere a script can read it —
           # measured on 0.56.1: nothing in hyprland.log, nothing in `hyprctl configerrors`,
           # and hyprctl still exits 0. So the compile happens here, with the same GLSL front end
-          shaders-compile = pkgs.runCommand "shaders-compile" { nativeBuildInputs = [ pkgs.glslang ]; } ''
-            # nullglob is on in a builder, so an empty glob would run the loop zero times
-            # and pass — the count is what keeps this check able to fail
-            shaders=(${shadersDir}/*.frag)
-            if (( ''${#shaders[@]} != 1 )); then
-              echo "expected one shader, found ''${#shaders[@]}: ''${shaders[*]}"
-              exit 1
-            fi
-            for frag in "''${shaders[@]}"; do
-              echo "compiling $(basename "$frag")"
-              # -S frag rather than trusting the suffix: without it a renamed file makes
-              # glslangValidator print its usage instead of judging the shader
-              glslangValidator -S frag "$frag"
-            done
-            touch $out
-          '';
+          shaders-compile =
+            pkgs.runCommand "shaders-compile" { nativeBuildInputs = with pkgs; [ glslang ]; }
+              ''
+                # nullglob is on in a builder, so an empty glob would run the loop zero times
+                # and pass — the count is what keeps this check able to fail
+                shaders=(${shadersDir}/*.frag)
+                if (( ''${#shaders[@]} != 1 )); then
+                  echo "expected one shader, found ''${#shaders[@]}: ''${shaders[*]}"
+                  exit 1
+                fi
+                for frag in "''${shaders[@]}"; do
+                  echo "compiling $(basename "$frag")"
+                  # -S frag rather than trusting the suffix: without it a renamed file makes
+                  # glslangValidator print its usage instead of judging the shader
+                  glslangValidator -S frag "$frag"
+                done
+                touch $out
+              '';
 
           # hyprlock has no way to check a config without a session, so the shape is the check:
           # the substitution has to have happened, and the dialog has to read the state files
-          conf-shape = pkgs.runCommand "conf-shape" { nativeBuildInputs = [ pkgs.gnugrep ]; } ''
+          conf-shape = pkgs.runCommand "conf-shape" { nativeBuildInputs = with pkgs; [ gnugrep ]; } ''
             conf=${ddlc-hyprlock}/share/ddlc-hyprlock/hyprlock.conf
 
             if grep -q '@share@' "$conf"; then
@@ -192,7 +194,7 @@
             in
             pkgs.runCommand "module-wiring"
               {
-                nativeBuildInputs = [ pkgs.jq ];
+                nativeBuildInputs = with pkgs; [ jq ];
                 dump = builtins.toJSON wiring;
                 passAsFile = [ "dump" ];
               }
@@ -241,15 +243,15 @@
           scripts-lint =
             pkgs.runCommand "scripts-lint"
               {
-                nativeBuildInputs = [
+                nativeBuildInputs = with pkgs; [
                   # check-sh.sh below is moving to reading the script it is given as a tree,
                   # out of `shfmt --to-json`, with jq flattening that tree into rows. This
                   # sandbox has a scrubbed PATH, so the dev shell's jq is not reachable here
                   # and the tool has to be named on this derivation
-                  pkgs.jq
-                  pkgs.shellcheck
-                  pkgs.shfmt
-                  pkgs.zsh
+                  jq
+                  shellcheck
+                  shfmt
+                  zsh
                 ];
               }
               ''

@@ -16,6 +16,23 @@ let
 
   # The same rule the package follows: an unset path means the shipped asset
   pick = given: shipped: if given != null then toString given else "${share}/${shipped}";
+
+  # Bound here so the body can inherit one name from it. Inlined, the attribute this module
+  # actually wants sits twenty lines below the binding it belongs to
+  rendered = import ./config.nix (
+    {
+      palette = self.lib.palette;
+      inherit (cfg)
+        dialog
+        font
+        stateDir
+        pollMs
+        ;
+      background = pick cfg.background "just-monika.png";
+      dialogImage = pick cfg.dialogImage "dialog-box.png";
+    }
+    // lib.filterAttrs (_: v: v != null) { inherit (cfg) placeholderText failText; }
+  );
 in
 {
   options.ddlc.hyprlock = {
@@ -246,21 +263,7 @@ in
     programs.hyprlock = {
       enable = true;
 
-      settings =
-        (import ./config.nix (
-          {
-            palette = self.lib.palette;
-            inherit (cfg)
-              dialog
-              font
-              stateDir
-              pollMs
-              ;
-            background = pick cfg.background "just-monika.png";
-            dialogImage = pick cfg.dialogImage "dialog-box.png";
-          }
-          // lib.filterAttrs (_: v: v != null) { inherit (cfg) placeholderText failText; }
-        )).settings;
+      inherit (rendered) settings;
     };
   };
 }
