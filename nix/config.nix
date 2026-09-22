@@ -65,10 +65,15 @@ let
     }
     // l;
 
-  # Background is a static image, not a screenshot: compositor would double-apply screen_shader on a screenshot
-  # Text uses label widgets, not image: label updates asynchronously in ms, image widget blocks on reload_cmd (>=1s latency)
-  # Labels just cat what the engine writes; pushing via SIGUSR2 instead is unsafe — hyprlock's handler
-  # touches its timer vector without the mutex and allocates, so it deadlocks a busy locker (upstream PR #539)
+  # Background is a static image, not a screenshot. On a screenshot the compositor would
+  # apply screen_shader a second time
+  #
+  # Text uses label widgets, not image. A label updates asynchronously in milliseconds,
+  # where an image widget blocks on reload_cmd for a second or more
+  #
+  # Labels just cat what the engine writes. Pushing with SIGUSR2 instead is unsafe:
+  # hyprlock's handler touches its timer vector without the mutex and allocates, so it
+  # deadlocks a busy locker — upstream PR #539
   settings = {
     general = {
       hide_cursor = true;
