@@ -116,7 +116,7 @@ That enables `programs.hyprlock`, writes the whole config, and installs the dial
 | `glitchShader`    | the shader `hyprctl` mode sets — a complete Hyprland screen shader, not an effect body                                                                   | [`shaders/glitch.frag`](shaders/glitch.frag)               |
 | `name`            | the name on the plate                                                                                                                                    | `Monika`                                                   |
 | `characterDir`    | what `[chr]` in a line becomes                                                                                                                           | the directory `quotesFile` is in                           |
-| `font`            | the font every label and the input field are set in                                                                                                      | `Doki`                                                     |
+| `font`            | the font every label and the input field are set in                                                                                                      | `Doki` if installed, else `Nunito Black`                   |
 | `background`      | the wallpaper behind the lock                                                                                                                            | `assets/just-monika.png`                                   |
 | `dialogImage`     | the dialog box the text sits in                                                                                                                          | `assets/dialog-box.png`                                    |
 | `quotesFile`      | what she talks about                                                                                                                                     | `assets/monika-talk.txt`, her Act 3 dialogue               |
@@ -151,7 +151,7 @@ The engine lives beside its assets in `share/ddlc-hyprlock` with a symlink in `b
 
 ### The font is not in here
 
-The config asks for **Doki**, the game's own face, which is not shipped — a theme has no business installing fonts, and that one is copyrighted besides. Set `font` to whatever you have, or install Doki yourself and leave it alone. The geometry does not depend on it: the text is pinned by texture size, not by font metrics
+The config asks for **Doki**, a font by 538Fonts that is free for personal use only, which is not shipped — a theme has no business installing fonts, and that one is not ours to hand out. When Doki is not installed the labels use **Nunito Black** ([SIL OFL 1.1](https://github.com/googlefonts/nunito)), which you install yourself too. The engine makes that choice each time a lock starts, so installing Doki later needs no rebuild; a lock started by plain hyprlock has no engine to choose, so set `font` there. Set `font` to any Pango font description you have to skip the choice, or install one of the two and leave it alone. The geometry does not depend on it: the text is pinned by texture size, not by font metrics
 
 ## Running a lock
 

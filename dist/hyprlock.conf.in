@@ -34,7 +34,7 @@ input-field {
     fail_color = rgb(6C4681)
     fail_text = This isn't it... ($ATTEMPTS)
     font_color = rgb(BB5599)
-    font_family = Doki
+    font_family = @font@
     halign = center
     inner_color = rgb(FFFFFF)
     monitor = 
@@ -48,7 +48,7 @@ input-field {
 }
 label {
     color = rgba(FFFFFFff)
-    font_family = Doki
+    font_family = @font@
     font_size = 150
     halign = center
     monitor = 
@@ -61,7 +61,7 @@ label {
 }
 label {
     color = rgba(FFFFFFe6)
-    font_family = Doki
+    font_family = @font@
     font_size = 30
     halign = center
     monitor = 
@@ -74,7 +74,7 @@ label {
 }
 label {
     color = rgba(FFFFFFdd)
-    font_family = Doki
+    font_family = @font@
     font_size = 24
     halign = center
     monitor = 
@@ -87,7 +87,7 @@ label {
 }
 label {
     color = rgba(FFFFFFff)
-    font_family = Doki
+    font_family = @font@
     font_size = 28
     halign = center
     monitor = 
@@ -102,7 +102,7 @@ label {
 }
 label {
     color = rgba(FFFFFFff)
-    font_family = Doki
+    font_family = @font@
     font_size = 24
     halign = center
     monitor = 

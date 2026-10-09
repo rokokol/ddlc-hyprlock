@@ -148,12 +148,14 @@ in
     };
 
     font = lib.mkOption {
-      type = lib.types.str;
-      default = "Doki";
+      type = lib.types.nullOr lib.types.str;
+      default = null;
       example = "Sans";
       description = ''
-        The font every label and the input field are set in. `Doki` is the game's own font,
-        which this package does not ship — install it yourself or name another one
+        The font every label and the input field are set in, as a Pango font description.
+        Null lets the dialog engine choose when a lock starts: `Doki`, a font by 538Fonts
+        for personal use, if fontconfig has it, otherwise `Nunito Black` (SIL OFL 1.1). This package ships
+        neither. Without `dialog` no engine runs at lock time, so null means `Doki` alone
       '';
     };
 

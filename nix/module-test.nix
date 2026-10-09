@@ -82,7 +82,15 @@ let
       name = "Sayori";
     };
   };
+  named = eval {
+    ddlc.hyprlock = {
+      enable = true;
+      font = "Sans";
+    };
+  };
   off = eval { ddlc.hyprlock.enable = false; };
+
+  firstFont = c: (builtins.head c.programs.hyprlock.settings.label).font_family;
 
   # The dialog is two labels on top of the three the plain lock has
   labels = c: builtins.length c.programs.hyprlock.settings.label;
@@ -103,7 +111,11 @@ in
   texts = texts on;
   # The background has to come out of the package, or the lock shows a colour and no image
   background = (builtins.head on.programs.hyprlock.settings.background).path;
-  font = (builtins.head on.programs.hyprlock.settings.label).font_family;
+  font = firstFont on;
+  # A font the user names reaches the labels as written; with no engine to choose, the
+  # unset one is Doki alone
+  fontNamed = firstFont named;
+  fontPlain = firstFont plain;
 
   lockCommand = on.ddlc.hyprlock.lockCommand;
 

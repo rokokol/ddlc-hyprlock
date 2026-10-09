@@ -14,7 +14,7 @@ The following are derived from or contain official DDLC assets:
 | `assets/just-monika.png` | the background |
 | `assets/monika-talk.txt`, `assets/monika-reentry.txt` | **the game's script**: Monika's Act 3 dialogue and her lines on re-entering the game, transcribed line for line. Nothing here is written in her voice — every line is hers as shipped, with `[player]` left where the game puts the player's name. One line departs from the transcription only in what it names: where she says her character file is "in the folder called characters", `[chr]` stands in for the folder name, so she names the folder that holds her on the machine she is running on |
 
-The `Doki` font family the config asks for is Team Salvato's and is **not** shipped here. Without it hyprlock falls back to whatever fontconfig resolves; see the README for how to point the config at another font
+The `Doki` font family the config asks for is a font by 538Fonts from 2015, free for personal use only. It is not part of the game and is **not** shipped here. Without it the config falls back to [Nunito](https://github.com/googlefonts/nunito) Black, which is licensed under the SIL Open Font License 1.1 and is not shipped here either; see the README for how to point the config at another font
 
 `shaders/glitch.frag` is not a game asset — it is a GLSL effect of my own, MIT like the rest of the code, and the same one [rokokol/hyprland-screen-shader](https://github.com/rokokol/hyprland-screen-shader) ships as a composable body
 

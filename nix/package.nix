@@ -30,7 +30,7 @@
   glitch ? withDialog,
   name ? "Monika",
   characterDir ? null,
-  font ? "Doki",
+  font ? null,
   background ? null,
   dialogImage ? null,
   quotes ? null,

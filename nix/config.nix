@@ -11,7 +11,10 @@
   background,
   dialogImage,
   dialog ? true,
-  font ? "Doki",
+  # null picks the face when the lock starts: a Pango weight in a family list applies to
+  # every family in it, so "Doki, Nunito Black" would embolden Doki. Only the dialog engine
+  # runs at lock time, so without it the labels ask for Doki alone
+  font ? null,
   stateDir ? "\${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc",
   # The one frame rate: also handed to the engine, so it never renders unread frames.
   # One character per tick at CPS=10; each update costs a /bin/sh, so don't lower it
@@ -56,12 +59,21 @@ let
   quoteFontSize = 24;
   fontPx = quoteFontSize * 4 / 3; # pango pt -> px @ 96dpi: wrapping metrics
 
+  # The token is the engine's to fill in; see ddlc-hyprlock.sh
+  fontFamily =
+    if font != null then
+      font
+    else if dialog then
+      "@font@"
+    else
+      "Doki";
+
   # All labels — on every monitor and in one font
   mkLabel =
     l:
     {
       monitor = "";
-      font_family = font;
+      font_family = fontFamily;
     }
     // l;
 
@@ -200,7 +212,7 @@ let
         outer_color = "rgb(${palette.pink})";
         inner_color = "rgb(${palette.paper})";
         font_color = "rgb(${palette.plum})";
-        font_family = font;
+        font_family = fontFamily;
         placeholder_text = placeholderText;
         fail_text = failText;
         # password check is highlighted with the same red as an error

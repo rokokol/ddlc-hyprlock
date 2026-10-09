@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 # The locker, as far as the engine cares: something that stays alive and then does not.
 # It never renders anything — the frames the engine publishes are the whole subject here
+#
+# It does record what it was started with and which config it was handed, for the font checks
+if [[ -n "${STUB_HYPRLOCK_LOG:-}" ]]; then
+  printf '%s\n' "$*" >"$STUB_HYPRLOCK_LOG"
+  if [[ "${1:-}" == "--config" ]]; then
+    cp -- "$2" "$STUB_HYPRLOCK_LOG.conf"
+  fi
+fi
 sleep "${STUB_HYPRLOCK_SLEEP:-20}"

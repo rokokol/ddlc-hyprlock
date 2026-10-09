@@ -2,6 +2,12 @@
 
 Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioned by [semver](https://semver.org/spec/v2.0.0.html)
 
+## [Unreleased]
+
+### Changed
+
+- the default `font` is now null, and the dialog engine picks the face each time a lock starts: Doki when fontconfig lists it, otherwise Nunito Black ([SIL OFL 1.1](https://github.com/googlefonts/nunito)), where fontconfig used to pick any font. Neither is shipped. The engine reads the config for the token `@font@` and starts hyprlock on a copy with the family filled in; a config with a font of its own is left alone. `DDLC_HYPRLOCK_CONFIG` names the config to read. A single family list such as `Doki, Nunito Black` cannot do this, because Pango puts the weight on every family in the list. Without `dialog` the default is `Doki` alone
+
 ## [1.1.1] - 2026-09-21
 
 ### Changed
