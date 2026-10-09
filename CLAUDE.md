@@ -46,7 +46,7 @@ install.sh           for systems without Nix
 
 ## Changing a colour
 
-It comes from `ddlc-palette` via `lib.bare`, never a literal in `nix/config.nix`. Regenerate `dist/` after any change (`nix build .#dist`), or `dist-is-current` fails; the weekly `palette-drift.yml` re-renders against the palette's HEAD
+It comes from `ddlc-palette` via `lib.bare`, never a literal in `nix/config.nix`. Regenerate `dist/` after any change (`nix build .#dist`), or `dist-is-current` fails; the weekly `update-lock.yml` takes the palette's HEAD with every other input, renders `dist/` again in the same commit and lands it on green, with no pull request
 
 ## CHANGELOG
 

@@ -75,7 +75,7 @@
           inherit (pkgs) hyprlock;
         };
 
-        # What dist/ is regenerated from — the palette-drift workflow builds this and copies it in
+        # What dist/ is regenerated from — the update-lock workflow builds this and copies it in
         dist = pkgs.runCommand "ddlc-hyprlock-dist" { } ''
           mkdir -p $out
           cp ${pkgs.writeText "hyprlock.conf.in" (render template.settings)} $out/hyprlock.conf.in
