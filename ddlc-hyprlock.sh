@@ -54,13 +54,7 @@ Behaviour switches:
   DDLC_HYPRLOCK_GLITCH    1 (default) or 0. 0 drops the journal follower and the
                           random glitch stream — the dialog still types, it just
                           never garbles
-  DDLC_HYPRLOCK_HYPRLOCK  the locker to run (default hyprlock on PATH)
-
-The font is chosen here, when the lock starts. A config whose font is the token @font@
-is copied into the state directory with Doki if fontconfig lists it, or Nunito Black if
-not, and hyprlock is started on that copy. A config with any other font is left alone:
-  DDLC_HYPRLOCK_CONFIG    the config to read (default hyprlock's own, under
-                          $XDG_CONFIG_HOME/hypr or ~/.config/hypr)
+  DDLC_HYPRLOCK_HYPRLOCK  the locker to run (default hyprlock on PATH), on its own config
 
 How the screen flashes on a glitch — the text garbles either way:
   DDLC_HYPRLOCK_FLASH     hyprctl (default), screen-shader, or anything else for
@@ -107,13 +101,6 @@ STATE_DIR="${DDLC_HYPRLOCK_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc}"
 # it just never garbles. The full-screen flash is a separate mechanism on top
 GLITCH="${DDLC_HYPRLOCK_GLITCH:-1}"
 HYPRLOCK="${DDLC_HYPRLOCK_HYPRLOCK:-hyprlock}"
-
-# The display face and its stand-in. They are two descriptions, never one family list: Pango
-# applies a weight to the whole list, so "Doki, Nunito Black" would draw Doki in synthetic bold
-FONT_TOKEN='@font@'
-FONT_PRIMARY=Doki
-FONT_FALLBACK='Nunito Black'
-CONFIG="${DDLC_HYPRLOCK_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hyprlock.conf}"
 
 # How the whole screen flashes on a glitch. hyprctl sets decoration:screen_shader and empties it
 # again — it does not restore the previous value, so a shader of the user's own does not survive,
@@ -489,47 +476,13 @@ hyprlock_alive() {
   [[ "$state" != "Z" ]]
 }
 
-# Whether fontconfig lists a family named exactly $1. A line of fc-list is the names of one
-# face, comma-separated
-have_family() {
-  local line name
-  local -a names
-  while IFS= read -r line; do
-    IFS=, read -ra names <<<"$line"
-    for name in "${names[@]}"; do
-      [[ "$name" == "$1" ]] && return 0
-    done
-  done < <(fc-list : family 2>/dev/null)
-  return 1
-}
-
-# The config names its font as a token, because only this machine knows what is installed.
-# A config without the token is the user's own choice and goes to hyprlock untouched
-resolve_config() {
-  local conf family
-  locker=("$HYPRLOCK")
-  [[ -r "$CONFIG" ]] || return 0
-  conf=$(<"$CONFIG")
-  [[ "$conf" == *"$FONT_TOKEN"* ]] || return 0
-  if have_family "$FONT_PRIMARY"; then
-    family=$FONT_PRIMARY
-  else
-    family=$FONT_FALLBACK
-  fi
-  rm -f "$STATE_DIR/hyprlock.conf"
-  (umask 077 && printf '%s\n' "${conf//"$FONT_TOKEN"/$family}" >"$STATE_DIR/hyprlock.conf")
-  locker+=(--config "$STATE_DIR/hyprlock.conf")
-}
-
 cmd_lock() {
-  local -a locker
   mkdir -p "$STATE_DIR"
   # the labels cat these on hyprlock's very first render
   : >"$FRAME_FILE"
   : >"$NAME_FILE"
 
-  resolve_config
-  "${locker[@]}" &
+  "$HYPRLOCK" &
   hyprlock_pid=$!
 
   # Dying with the flash still on would leave the whole screen glitched, and the follower

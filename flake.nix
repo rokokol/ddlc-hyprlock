@@ -212,9 +212,9 @@
                   "nothing reads the rendered frame"
                 want '.background | test("/nix/store/.*ddlc-hyprlock")' \
                   "the background does not come from the package"
-                want '.font == "@font@"' "the engine's font token is not in the labels"
+                want '.font == "Doki,Nunito @wght=900"' "the labels do not ask for Doki, else Nunito Black"
                 want '.fontNamed == "Sans"' "a font the user names does not reach the labels"
-                want '.fontPlain == "Doki"' "the labels without an engine do not ask for Doki"
+                want '.fontPlain == .font' "the labels without the dialog engine ask for another face"
                 want '.lockCommand | test("ddlc-hyprlock.*lock$")' "a lock does not run the engine"
 
                 # The flash that needs nothing is the default, and it stays quiet

@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# The font list, as far as the engine cares: the families a test says are installed, one
-# face per line with its names comma-separated, the way fc-list prints them
-printf '%s' "${STUB_FC_LIST:-}"

@@ -151,7 +151,7 @@ The engine lives beside its assets in `share/ddlc-hyprlock` with a symlink in `b
 
 ### The font is not in here
 
-The config asks for **Doki**, a font by 538Fonts that is free for personal use only, which is not shipped — a theme has no business installing fonts, and that one is not ours to hand out. When Doki is not installed the labels use **Nunito Black** ([SIL OFL 1.1](https://github.com/googlefonts/nunito)), which you install yourself too. The engine makes that choice each time a lock starts, so installing Doki later needs no rebuild; a lock started by plain hyprlock has no engine to choose, so set `font` there. Set `font` to any Pango font description you have to skip the choice, or install one of the two and leave it alone. The geometry does not depend on it: the text is pinned by texture size, not by font metrics
+The config asks for **Doki**, a font by 538Fonts that is free for personal use only, which is not shipped — a theme has no business installing fonts, and that one is not ours to hand out. When Doki is not installed the labels use **Nunito Black** ([SIL OFL 1.1](https://github.com/googlefonts/nunito)), which you install yourself too. The config makes that choice by itself, through one Pango font description that the variable Nunito answers in its Black weight and Doki in its own, so installing Doki later needs no rebuild and a lock started by plain hyprlock looks the same. Set `font` to any Pango font description you have to skip the choice, or install one of the two and leave it alone. The geometry does not depend on it: the text is pinned by texture size, not by font metrics
 
 ## Running a lock
 

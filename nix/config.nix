@@ -11,9 +11,7 @@
   background,
   dialogImage,
   dialog ? true,
-  # null picks the face when the lock starts: a Pango weight in a family list applies to
-  # every family in it, so "Doki, Nunito Black" would embolden Doki. Only the dialog engine
-  # runs at lock time, so without it the labels ask for Doki alone
+  # A Pango font description; null is the default below
   font ? null,
   stateDir ? "\${XDG_RUNTIME_DIR:-/tmp}/hypr-ddlc",
   # The one frame rate: also handed to the engine, so it never renders unread frames.
@@ -59,14 +57,11 @@ let
   quoteFontSize = 24;
   fontPx = quoteFontSize * 4 / 3; # pango pt -> px @ 96dpi: wrapping metrics
 
-  # The token is the engine's to fill in; see ddlc-hyprlock.sh
-  fontFamily =
-    if font != null then
-      font
-    else if dialog then
-      "@font@"
-    else
-      "Doki";
+  # Doki where it is installed, Nunito Black otherwise. Pango puts a weight on every family
+  # in a list, so "Doki, Nunito Black" would draw Doki in synthetic bold. An axis value
+  # reaches only a font that has the axis: Doki has none and stays as drawn, the variable
+  # Nunito becomes Black. hyprlock reads the string with pango_font_description_from_string
+  fontFamily = if font != null then font else "Doki,Nunito @wght=900";
 
   # All labels — on every monitor and in one font
   mkLabel =

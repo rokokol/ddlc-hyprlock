@@ -112,8 +112,8 @@ in
   # The background has to come out of the package, or the lock shows a colour and no image
   background = (builtins.head on.programs.hyprlock.settings.background).path;
   font = firstFont on;
-  # A font the user names reaches the labels as written; with no engine to choose, the
-  # unset one is Doki alone
+  # A font the user names reaches the labels as written; the unset one is the same with the
+  # dialog engine and without it
   fontNamed = firstFont named;
   fontPlain = firstFont plain;
 

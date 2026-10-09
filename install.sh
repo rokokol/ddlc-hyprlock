@@ -38,9 +38,8 @@ Then take the config and point whatever locks your session at the engine:
   cp \$PREFIX/share/ddlc-hyprlock/hyprlock.conf ~/.config/hypr/hyprlock.conf
   ddlc-hyprlock lock
 
-The font is chosen by the engine when a lock starts: Doki, a font by 538Fonts, if it
-is installed, otherwise Nunito Black — neither is shipped here. The config only holds
-the token @font@, so a lock started by plain hyprlock needs a font set by hand
+The config asks for Doki, a font by 538Fonts, where it is installed, and Nunito Black
+otherwise — neither is shipped here
 
 Runtime environment (read by the installed engine, not this script; ddlc-hyprlock help
 has the full list):

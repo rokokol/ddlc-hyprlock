@@ -153,9 +153,8 @@ in
       example = "Sans";
       description = ''
         The font every label and the input field are set in, as a Pango font description.
-        Null lets the dialog engine choose when a lock starts: `Doki`, a font by 538Fonts
-        for personal use, if fontconfig has it, otherwise `Nunito Black` (SIL OFL 1.1). This package ships
-        neither. Without `dialog` no engine runs at lock time, so null means `Doki` alone
+        Null means `Doki`, a font by 538Fonts for personal use, where it is installed, and
+        `Nunito Black` (SIL OFL 1.1) otherwise. This package ships neither
       '';
     };
 

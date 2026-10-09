@@ -6,6 +6,12 @@ Kept in the shape of [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), v
 
 ### Changed
 
+- the config chooses between Doki and Nunito Black by itself, through the font description `Doki,Nunito @wght=900`: the weight axis reaches only the variable Nunito, so Doki keeps its own weight. The engine no longer reads fontconfig or starts hyprlock on a filled-in copy, so a lock started by plain hyprlock now gets the same face, and `dialog = false` gets the Nunito Black fallback too
+
+### Removed
+
+- `DDLC_HYPRLOCK_CONFIG` and the `@font@` token: hyprlock reads its own config again
+
 - the weekly lock bump renders `dist/` again from the new palette and lands both together, so a colour that moved upstream reaches the lock screen without a hand and without a pull request. `palette-drift.yml`, which opened that pull request, is removed
 
 ## [1.2.0] - 2026-10-09

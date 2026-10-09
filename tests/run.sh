@@ -310,55 +310,23 @@ else
   fail "something was called anyway: $(cat "$HYPRCTL_LOG" "$SHADER_LOG")"
 fi
 
-echo "the font"
+echo "the config"
 
-# The engine fills the token in per machine. The families go in as separate descriptions: a
-# list such as "Doki, Nunito Black" would put Nunito's weight on Doki as well
+# The config names its font itself, so the engine hands hyprlock nothing: hyprlock reads
+# its own config, as a lock started without the engine does
 export STUB_HYPRLOCK_LOG="$WORK/hyprlock.log"
-printf 'label {\n    font_family = @font@\n}\ninput-field {\n    font_family = @font@\n}\n' >"$WORK/tokened.conf"
-printf 'label {\n    font_family = Sans\n}\n' >"$WORK/named.conf"
-export DDLC_HYPRLOCK_CONFIG="$WORK/tokened.conf"
 say 'Just Monika'
-
-# Run a lock, wait for the stub locker to log how it was started, and stop
-started() {
-  rm -f "$STUB_HYPRLOCK_LOG" "$STUB_HYPRLOCK_LOG.conf"
-  lock
-  logged "$STUB_HYPRLOCK_LOG" "" 30 || true
-  sleep 0.3
-  stop
-}
-
-STUB_FC_LIST=$'Doki,Doki Regular\nNunito,Nunito Black\n' started
-if [[ "$(grep -c '^    font_family = Doki$' "$STUB_HYPRLOCK_LOG.conf" 2>/dev/null)" == 2 ]] &&
-  ! grep -q 'Nunito\|@font@' "$STUB_HYPRLOCK_LOG.conf"; then
-  ok "Doki, when installed, is every label's font, alone"
+rm -f "$STUB_HYPRLOCK_LOG"
+lock
+logged "$STUB_HYPRLOCK_LOG" "" 30 || true
+sleep 0.3
+stop
+if [[ -f "$STUB_HYPRLOCK_LOG" && -z "$(cat "$STUB_HYPRLOCK_LOG")" ]]; then
+  ok "hyprlock is started on its own config, with no arguments"
 else
-  fail "the config handed to hyprlock: $(cat "$STUB_HYPRLOCK_LOG.conf" 2>&1)"
+  fail "hyprlock was started as: $(cat "$STUB_HYPRLOCK_LOG" 2>&1)"
 fi
-
-STUB_FC_LIST=$'Nunito,Nunito Black\nDoki Nerd Font Mono\n' started
-if [[ "$(grep -c '^    font_family = Nunito Black$' "$STUB_HYPRLOCK_LOG.conf" 2>/dev/null)" == 2 ]] &&
-  ! grep -q 'Doki\|@font@' "$STUB_HYPRLOCK_LOG.conf"; then
-  ok "without Doki the labels use Nunito Black (a Doki Nerd Font is not Doki)"
-else
-  fail "the config handed to hyprlock: $(cat "$STUB_HYPRLOCK_LOG.conf" 2>&1)"
-fi
-
-if [[ "$(cat "$STUB_HYPRLOCK_LOG")" == "--config "* ]]; then
-  ok "hyprlock is started on the resolved copy"
-else
-  fail "hyprlock was started as: $(cat "$STUB_HYPRLOCK_LOG")"
-fi
-
-export DDLC_HYPRLOCK_CONFIG="$WORK/named.conf"
-STUB_FC_LIST=$'Doki\n' started
-if [[ -z "$(cat "$STUB_HYPRLOCK_LOG")" && ! -e "$STUB_HYPRLOCK_LOG.conf" ]]; then
-  ok "a config with a font of its own is left alone"
-else
-  fail "hyprlock was started as: $(cat "$STUB_HYPRLOCK_LOG")"
-fi
-unset DDLC_HYPRLOCK_CONFIG STUB_HYPRLOCK_LOG
+unset STUB_HYPRLOCK_LOG
 
 echo "the locker owns the lock"
 
