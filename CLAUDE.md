@@ -43,6 +43,8 @@ install.sh           for systems without Nix
 - **`$out` cannot travel through `writeText`.** The placeholder is only substituted in the derivation whose environment holds it. Render with `@token@` and `substitute --subst-var-by` in `installPhase` — the same token then survives into `dist/` for the non-Nix install
 - **the package argument is `withDialog`, not `dialog`.** `callPackage` fills any argument that has a same-named attr in nixpkgs, silently: `dialog ? true` became `pkgs.dialog`. The public option keeps the short name
 - **`&` in `${s//pat/repl}` means "what matched"** since bash 5.2, so `${s//</&lt;}` yields `<lt;`. Escaped as `\&`, which is why the engine needs bash ≥ 5.2
+- **`./tests/run.sh` tests the `ddlc-hyprlock` on `PATH`**, which on a workstation is the installed release, not the checkout. `DDLC_HYPRLOCK_BIN=$PWD/ddlc-hyprlock.sh` points it at the checkout, but the bare script lacks the share directory the package wrapper sets, so the shader checks fail there. `nix flake check` runs the suite against the built package and is the run that counts
+- **`./tests/live.sh` flashes the real screen** through `decoration:screen_shader` of the running Hyprland and puts the slot back. With screen-shader active the slot holds its effect again at once, so "the slot still holds …" fails without anything being wrong
 
 ## Changing a colour
 
