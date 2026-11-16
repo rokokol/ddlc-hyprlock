@@ -35,7 +35,7 @@ INSTALL_FLAGS=()
 declare -A BOOTSTRAP=(
   [debian]=':'
   [ubuntu]=':'
-  [arch]='pacman -Sy --noconfirm --needed diffutils'
+  [arch]='pacman -Syu --noconfirm --needed diffutils'
   [fedora]='dnf install -y -q diffutils'
 )
 
